@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon32.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon16.png">
+  <link rel="mask-icon" href="/images/favicon32.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-flash.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"hack1ng4fun.github.io","root":"/","scheme":"Gemini","version":"7.7.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="「云安全」篇企业上云，特别是一些初创企业，「上云」已经是一种趋势，包括一些大型企业一般也会选择「混合云」，所以作为安全人员，掌握和了解「云安全」相关知识可以帮助你在原本的基础上加大优势和筹码。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="「云安全」篇">
+<meta property="og:url" content="https://hack1ng4fun.github.io/2019/10/16/%E3%80%8C%E4%BA%91%E5%AE%89%E5%85%A8%E3%80%8D%E7%AF%87/index.html">
+<meta property="og:site_name" content="勇敢的心">
+<meta property="og:description" content="「云安全」篇企业上云，特别是一些初创企业，「上云」已经是一种趋势，包括一些大型企业一般也会选择「混合云」，所以作为安全人员，掌握和了解「云安全」相关知识可以帮助你在原本的基础上加大优势和筹码。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://raw.githubusercontent.com/Hack1ng4fun/Hack1ng4fun.github.io/Pics/CloudWAF.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Hack1ng4fun/Hack1ng4fun.github.io/Pics/8s9df.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Hack1ng4fun/Hack1ng4fun.github.io/Pics/Flowcleaning.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Hack1ng4fun/Hack1ng4fun.github.io/Pics/VPC.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Hack1ng4fun/Hack1ng4fun.github.io/Pics/ACL.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Hack1ng4fun/Hack1ng4fun.github.io/Pics/sd9flsdm2pzl.png">
+<meta property="article:published_time" content="2019-10-15T16:43:41.000Z">
+<meta property="article:modified_time" content="2020-03-26T13:02:53.000Z">
+<meta property="article:author" content="勇敢的心">
+<meta property="article:tag" content="云安全">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/Hack1ng4fun/Hack1ng4fun.github.io/Pics/CloudWAF.png">
+
+<link rel="canonical" href="https://hack1ng4fun.github.io/2019/10/16/%E3%80%8C%E4%BA%91%E5%AE%89%E5%85%A8%E3%80%8D%E7%AF%87/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>「云安全」篇 | 勇敢的心</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="勇敢的心" type="application/atom+xml">
+<link rel="alternate" href="/rss2.xml" title="勇敢的心" type="application/rss+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">勇敢的心</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://hack1ng4fun.github.io/2019/10/16/%E3%80%8C%E4%BA%91%E5%AE%89%E5%85%A8%E3%80%8D%E7%AF%87/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://raw.githubusercontent.com/Hack1ng4fun/Hack1ng4fun.github.io/Pics/mhyVJS.png">
+      <meta itemprop="name" content="勇敢的心">
+      <meta itemprop="description" content="Just for Fun">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="勇敢的心">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          「云安全」篇
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-10-16 00:43:41" itemprop="dateCreated datePublished" datetime="2019-10-16T00:43:41+08:00">2019-10-16</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/" itemprop="url" rel="index"><span itemprop="name">网络安全</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>5.8k</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="「云安全」篇"><a href="#「云安全」篇" class="headerlink" title="「云安全」篇"></a>「云安全」篇</h1><p>企业上云，特别是一些初创企业，「上云」已经是一种趋势，包括一些大型企业一般也会选择「混合云」，所以作为安全人员，掌握和了解「云安全」相关知识可以帮助你在原本的基础上加大优势和筹码。</p>
+<a id="more"></a>
+
+<h2 id="云计算（cloud-computing）"><a href="#云计算（cloud-computing）" class="headerlink" title="云计算（cloud computing）"></a>云计算（cloud computing）</h2><h3 id="什么是「云计算」"><a href="#什么是「云计算」" class="headerlink" title="什么是「云计算」"></a>什么是「云计算」</h3><p>「云计算」是基于互联网的相关服务的增加、使用和交付模式，通常涉及通过互联网来提供动态易扩展且经常是虚拟化的资源。云是网络、互联网的一种比喻说法。过去在图中往往用云来表示电信网，后来也用来表示互联网和底层基础设施的抽象。因此，云计算甚至可以让你体验每秒10万亿次的运算能力，拥有这么强大的计算能力可以模拟核爆炸、预测气候变化和市场发展趋势。用户通过电脑、笔记本、手机等方式接入数据中心，按自己的需求进行运算。</p>
+<p>云计算（Cloud Computing）是分布式计算（Distributed Computing）、并行计算（Parallel Computing）、效用计算（Utility Computing）、 网络存储（Network Storage Technologies）、虚拟化（Virtualization）、负载均衡（LoadBalance）、热备份冗余（High Available）等传统计算机和网络技术发展融合的产物。</p>
+<h3 id="「云计算」的定义"><a href="#「云计算」的定义" class="headerlink" title="「云计算」的定义"></a>「云计算」的定义</h3><p>对云计算的定义有多种说法。对于到底什么是云计算，至少可以找到100种解释。 现阶段广为接受的是美国国家标准与技术研究院（NIST）定义：云计算是一种按使用量付费的模式，这种模式提供可用的、便捷的、按需的网络访问， 进入可配置的计算资源共享池（资源包括网络，服务器，存储，应用软件，服务），这些资源能够被快速提供，只需投入很少的管理工作，或与服务供应商进行很少的交互。</p>
+<h3 id="公有云-私有云-混合云"><a href="#公有云-私有云-混合云" class="headerlink" title="公有云/私有云/混合云"></a>公有云/私有云/混合云</h3><p>「公有云」可以理解为类似腾讯云、阿里云这种，其实就是公有云平台，那么他们提供的云服务，其实就是一种公有云服务，因为使用者是各种企业和个人；而与之相对的「私有云」就是指企业自建的云服务，企业自己使用而不像腾讯云、阿里云等对外提供服务；而「混合云」就是混合两者的情况了，有些企业会选择多个公有云平台然后加上自己搭建私有云的形式来给公司业务提供计算服务，这种架构和设计就是混合云。</p>
+<h2 id="云安全"><a href="#云安全" class="headerlink" title="云安全"></a>云安全</h2><p>随着「云计算」这个概念的出现，自然在安全领域就产生了「云安全」这个概念。那么什么又是云安全？通俗的理解，在传统反病毒领域，云安全其实就是一种基于「云」技术的安全应用，比如云查杀；而其实就基于云计算而言，可能不限于是安全应用，还有就是就是围绕着云计算的安全对抗，是传统网络安全在「云」这一领域的延伸，包括安全产品，所以有的时候大家会发现，云安全做的事情或者产品其实跟传统网络安全似乎差别不大，可能只是将对抗的战场从传统服务器变成了云环境，又或者是产品架构上更适应公有云、混合云等情况；再者就是云是基于虚拟化技术，所以自然而然也包括虚拟化安全，但是你又会发现这其实也是传统网络安全的一部分。</p>
+<p>云安全从本质上与传统的网络安全区别并不大，云服务的提供包含有云计算服务(也就是云主机)、存储、网络、数据库服务、大数据服务、在线计算服务、短信服务、人工智能服务等等，那么这里面就有一大堆的安全风险，自然衍生安全保障、对抗、检测、防护等需求，比如说主机安全，也就是传统服务器安全，传统的解决方案是 IDS（入侵检测系统）；还有 DDoS（分布式拒绝服务攻击），解决方案是抗D产品，包含流量清洗、高防等；再者，比如云主机在漏洞的方面其实跟传统服务器上的漏洞也一样，包含操作系统漏洞、服务漏洞、部署业务漏洞等，这些点其实都是一致的。</p>
+<h3 id="主机安全"><a href="#主机安全" class="headerlink" title="主机安全"></a>主机安全</h3><h4 id="「暴力破解」与「异地登录」"><a href="#「暴力破解」与「异地登录」" class="headerlink" title="「暴力破解」与「异地登录」"></a>「暴力破解」与「异地登录」</h4><h5 id="暴力破解"><a href="#暴力破解" class="headerlink" title="暴力破解"></a>暴力破解</h5><p><strong>「暴力破解」就是密码枚举的过程：</strong>事先生成一份可能的密码列表（通常叫作「字典」），然后遍历字典（将里面的密码逐一尝试）。<br>例如：针对云主机的「远程登录」进行暴力破解，破解成功将可以直接获取云主机的服务器权限。</p>
+<p>可以通过「登录日志」来查看是否有相关的尝试登录的操作（暴力破解会有大量的登录尝试记录），如果其中有登录状态为成功的记录，表明主机的登录密码已经被成功破解。</p>
+<p>防御：</p>
+<ul>
+<li>使用复杂的口令（Linux建议使用公/私钥登录，放弃口令登录）</li>
+<li>修改默认登录端口</li>
+<li>通过防火墙或者云厂商提供的安全组等方式进行白名单的登录，禁止非白名单的 IP 登录</li>
+<li>安装一些主机安全软件进行对应的防御和检测</li>
+</ul>
+<h5 id="异地登录"><a href="#异地登录" class="headerlink" title="异地登录"></a>异地登录</h5><p>登录地区不是自身（或工作人员）所在的地区，来自陌生地区的登录记录。</p>
+<p>暴力破解成功的原因在于「云主机存在系统弱口令」；<br>异地登录则可能是黑客「通过其他漏洞或其他方式获得了服务器权限」。</p>
+<p>防御：</p>
+<p>登录成功证明黑客已经获得了主机的帐号密码，意味着服务器存在安全问题，需要排查入侵原因，再进行对应的修复与防御（同时可以屏蔽恶意登录的IP的访问；也可以通过白名单的方式限制访问）。</p>
+<h4 id="病毒木马与WebShell"><a href="#病毒木马与WebShell" class="headerlink" title="病毒木马与WebShell"></a>病毒木马与WebShell</h4><p>针对云主机的病毒往往功能上更趋向于如挖矿、加密勒索、对外DDoS、后门程序等利用云主机资源的行为或控制云主机，不会存在如盗号等功能性的木马。</p>
+<h4 id="在云主机上检测-WebShell-和病毒木马"><a href="#在云主机上检测-WebShell-和病毒木马" class="headerlink" title="在云主机上检测 WebShell 和病毒木马"></a>在云主机上检测 WebShell 和病毒木马</h4><h5 id="病毒木马的检测"><a href="#病毒木马的检测" class="headerlink" title="病毒木马的检测"></a>病毒木马的检测</h5><ul>
+<li>云查杀</li>
+<li>通过本地引擎进行特征检测、沙箱行为检测</li>
+<li>利用「机器学习」等方法进行样本的训练，对恶意文件进行检测</li>
+</ul>
+<h5 id="WebShell-的检测"><a href="#WebShell-的检测" class="headerlink" title="WebShell 的检测"></a>WebShell 的检测</h5><p>D盾、安全狗、云镜、安骑士等安全产品都具有对 WebShell 的检测能力</p>
+<p>对于 WebShell 和病毒木马的检测，除了使用相关的安全产品，也可以利用一些在线工具进行检测或者进行人工的文件分析。</p>
+<h5 id="病毒木马与-WebShell-的处理"><a href="#病毒木马与-WebShell-的处理" class="headerlink" title="病毒木马与 WebShell 的处理"></a>病毒木马与 WebShell 的处理</h5><p>删除恶意文件，排查云主机上是否存在其他恶意文件，检查有哪些系统配置和文件被改动过了……；</p>
+<p>排查入侵原因：WebShell 往往是因为云主机里Web服务存在漏洞而导致将WebShell上传；病毒木马往往是通过系统漏洞或者云主机上的服务漏洞而导致病毒木马的植入。</p>
+<h4 id="服务器安全加固"><a href="#服务器安全加固" class="headerlink" title="服务器安全加固"></a>服务器安全加固</h4><ul>
+<li>关闭非必要服务等，减少攻击面</li>
+<li>修复安全问题，解决已有隐患</li>
+<li>优化策略，增加限制，提高入侵难度</li>
+<li>优化日志存储，提供「可溯源」</li>
+</ul>
+<h4 id="入侵检测"><a href="#入侵检测" class="headerlink" title="入侵检测"></a>入侵检测</h4><h5 id="主机内可以用来判断机器是否被入侵的信息"><a href="#主机内可以用来判断机器是否被入侵的信息" class="headerlink" title="主机内可以用来判断机器是否被入侵的信息"></a>主机内可以用来判断机器是否被入侵的信息</h5><ul>
+<li>异常的文件落地</li>
+<li>异常的登录行为</li>
+<li>异常的网络请求（DNS、HTTP请求、反弹Shell、……）</li>
+<li>敏感文件变更和特殊行为（crontab 等敏感文件被更改、异常的命令执行等）</li>
+<li>……</li>
+</ul>
+<h3 id="应用安全"><a href="#应用安全" class="headerlink" title="应用安全"></a>应用安全</h3><h4 id="云WAF"><a href="#云WAF" class="headerlink" title="云WAF"></a>云WAF</h4><p>WAF 全称是「Web Application Firewall（Web应用防火墙）」，是通过执行一系列针对HTTP/HTTPS的安全策略来专门为Web应用提供保护的产品。</p>
+<h5 id="WAF的三种类型"><a href="#WAF的三种类型" class="headerlink" title="WAF的三种类型"></a>WAF的三种类型</h5><ul>
+<li><p>硬件防火墙<br>以一个独立硬件盒子的方式串行部署在Web服务器前端，主要是通过串接到交换机上，这样经过交换机的所有HTTP流量都会经过防火墙进行识别和检测，针对恶意流量直接拦截。</p>
+<ul>
+<li>优点<ul>
+<li>部署简单</li>
+<li>由于是硬件形式的，一般可承受的吞吐量会比较大，性能比较高</li>
+</ul>
+</li>
+<li>缺点<ul>
+<li>价格昂贵</li>
+<li>通常是离线部署，也就意味着存在规则无法实时更新的问题</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>软件防火墙<br>以软件的形式直接安装在服务器上。 这类防火墙的实现方式通常是通过 WAF 监听端口或以Web容器拓展的方式来进行请求的检测和阻断。</p>
+<ul>
+<li>优点<ul>
+<li>安装简单——下载就可以安装使用</li>
+<li>有些产品是免费的</li>
+</ul>
+</li>
+<li>缺点<ul>
+<li>需要消耗服务器资源</li>
+<li>不适合大型Web应用</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>云WAF<br>近几年开始流行的一种 WAF，它的主要实现方式是利用 DNS 技术，通过移交域名解析权来实现安全防护：用户的请求首先发送到云端节点进行检测，如果存在异常请求则进行拦截，否则将请求转发至真实服务器。</p>
+<ul>
+<li>优点<ul>
+<li>部署比 软件WAF 更简单</li>
+<li>对网站主而言，基本没有运维成本（云WAF厂商会自己跟踪最新漏洞然后添加对应规则，并实时更新到各个节点）</li>
+<li>规则实时更新，用户无感知</li>
+<li>由于 云WAF 的多节点部署方式，通常还带有 CDN 的功能，自动为访问的用户分配最近的节点，于是在访问速度上就能得到提升</li>
+</ul>
+</li>
+<li>缺点<br>由于是采用 DNS 的方式，假如Web应用的真实IP泄漏了，那么就可以绕过 WAF 进行Web攻击。</li>
+</ul>
+</li>
+</ul>
+<p>选用哪种类型的 WAF 主要取决于实际的业务场景，不过一般情况下，大部分的业务场景都是可以直接使用 云WAF 的。</p>
+<p><img src="https://raw.githubusercontent.com/Hack1ng4fun/Hack1ng4fun.github.io/Pics/CloudWAF.png" alt="云WAF 工作原理示意图"></p>
+<h3 id="网络安全"><a href="#网络安全" class="headerlink" title="网络安全"></a>网络安全</h3><h4 id="DDoS攻击"><a href="#DDoS攻击" class="headerlink" title="DDoS攻击"></a>DDoS攻击</h4><p>DoS 是「Denial of Service 拒绝服务」，而 DDoS 就是「Distributed Denial of Service 分布式拒绝服务」。</p>
+<p>DoS攻击 就是「在短时间内发起大量请求，耗尽服务器的资源」，导致网站无法响应正常的访问，从而实现「拒绝服务」。</p>
+<p>按照 TCP/IP 的层次，可将 DDoS攻击 分为：</p>
+<ul>
+<li>基于 ARP 的攻击</li>
+<li>基于 ICMP 的攻击</li>
+<li>基于 IP 的攻击</li>
+<li>基于 UDP 的攻击</li>
+<li>基于 TCP 的攻击</li>
+<li>基于 应用层 的攻击</li>
+</ul>
+<h5 id="几种特殊的、容易混淆的DDos类型"><a href="#几种特殊的、容易混淆的DDos类型" class="headerlink" title="几种特殊的、容易混淆的DDos类型"></a>几种特殊的、容易混淆的DDos类型</h5><ul>
+<li>CC攻击</li>
+</ul>
+<p>CC攻击 是一种特殊的DDoS攻击，主要针对网站页面，攻击者通过代理服务器或肉鸡向受害者主机不停地发送大量数据包，造成对方服务器资源耗尽，一直到宕机崩溃。</p>
+<p>这种攻击见不到 源IP，也没有特别大的异常流量，但造成了服务器无法进行正常连接。这种攻击技术含量低，利用一些IP代理和更换代理IP的工具，一个初、中级电脑水平的用户就能够实施攻击。</p>
+<p>CC攻击 的特点是，它是针对网站页面发起的，CC攻击的每个请求都是正常的访问，之所以能够达到攻击的目的是因为网站在响应每个页面请求的时候，可能会涉及到数据库查询、数据处理等操作，然后再响应页面内容；这些操作都是需要消耗服务器资源的，当访问量过大的时候，就导致页面无法正常响应正常的请求，也就实现了攻击的目的。</p>
+<ul>
+<li>UDP反射放大攻击</li>
+</ul>
+<p>「UDP反射放大攻击」是指，攻击者不是直接发起对攻击目标的攻击，而是利用互联网上开放的某些服务，通过伪造被攻击者的地址为请求源IP，向该服务器发送基于 UDP 的特殊报文，数倍于请求报文的回复的数据被发送到被攻击者IP，从而对后者间接形成 DDoS攻击。</p>
+<p><img src="https://raw.githubusercontent.com/Hack1ng4fun/Hack1ng4fun.github.io/Pics/8s9df.png" alt="UDP反射放大攻击 示意图"></p>
+<h5 id="DDoS-防护"><a href="#DDoS-防护" class="headerlink" title="DDoS 防护"></a>DDoS 防护</h5><ul>
+<li>流量清洗</li>
+</ul>
+<p>「流量清洗」就是鉴别接收流量中哪些是属于异常的攻击流量，把这部分流量丢弃，然后其他正常流量再到达源服务器。通常实现流量清洗的做法是将流量从原始网络路径中重定向到清洗设备上。</p>
+<p>通过流量清洗可以减缓攻击对服务器造成的损害，但对流量中正常的部分可能造成损伤。</p>
+<ul>
+<li><p>流量清洗的常规方法</p>
+<ul>
+<li><p>近源清洗</p>
+<p>屏蔽攻击源地址的那部份地区的访问（舍弃那部份地区的所有访问（其中当然也有来自正常用户的访问），保全其他地区用户的正常访问，属于一种「弃车保帅」的做法）。</p>
+</li>
+<li><p>近目的清洗</p>
+<p>在接近「攻击目的地」的地方，针对来自可能不同地方的攻击流量进行清洗。</p>
+</li>
+</ul>
+</li>
+</ul>
+<p><img src="https://raw.githubusercontent.com/Hack1ng4fun/Hack1ng4fun.github.io/Pics/Flowcleaning.png" alt="流量清洗 示意图"></p>
+<ul>
+<li>黑洞</li>
+</ul>
+<p>「黑洞」是指服务器受攻击流量超过机器所在机房黑洞阀值时，云厂商会屏蔽服务器的外网访问。</p>
+<p>传统早期的「黑洞」是位于机房入口处，现在的「黑洞」一般是由运营商提供的服务，在运营商侧丢弃流量，这样就可以大大缓解 DDoS攻击 对机房带宽的压力。</p>
+<ul>
+<li>高防IP</li>
+</ul>
+<p>「高防机房」要求有足够大的出口带宽，这样才能抗得住足够大的攻击流量，「高防IP」就是高防机房的IP段。</p>
+<p>通过配置高防IP，比如将域名解析到高防IP，再设置源IP，这样所有公网流量都会先经过高防机房，然后再进行清洗过滤后将正常的流量返回给源站IP，从而确保源站IP的稳定访问。</p>
+<ul>
+<li>DDoS防护包</li>
+</ul>
+<p>直接把防御能力加载到云产品上，而无需配置流量转发等。这种防护只能应用在云厂商的云产品。</p>
+<h4 id="云防火墙与安全组"><a href="#云防火墙与安全组" class="headerlink" title="云防火墙与安全组"></a>云防火墙与安全组</h4><ul>
+<li>安全组</li>
+</ul>
+<p>一种有状态的包过滤功能虚拟防火墙，用于设置单台或多台云服务器的网络访问控制，是云厂商提供的重要的网络安全隔离手段。</p>
+<ul>
+<li>云防火墙<ul>
+<li>流量识别与可视</li>
+<li>入侵检测</li>
+<li>防火墙策略管理</li>
+</ul>
+</li>
+</ul>
+<h4 id="VPC（Virtual-Private-Cloud）"><a href="#VPC（Virtual-Private-Cloud）" class="headerlink" title="VPC（Virtual Private Cloud）"></a>VPC（Virtual Private Cloud）</h4><p>公有云的网络一般分为「经典网络」（也称为基础网络）和 VPC。经典网络就是「公有云上所有用户共享公共网络资源池，用户之间未做逻辑隔离」。用户的内网IP由系统统一分配，相同的内网IP无法分配给不同用户。</p>
+<ul>
+<li><p>经典网络的一些风险</p>
+<ul>
+<li>可以确定内网中的其他机器百分百是服务器，就不用判断目标机器是否是一台服务器，提高了端口扫描的效率</li>
+<li>经典网络的IP段都是连续的，为扫描带来了更多便利</li>
+<li>通过<code>route</code>命令查看路由表，还可以发现很多其他的内网网段</li>
+<li>在内网发起攻击，速度自然也快，可能还没安全监控</li>
+<li>可能还可以对供应商的控制系统发起攻击</li>
+</ul>
+</li>
+</ul>
+<p>以上的解决方案就是 VPC——一种运行在公有云上，将一部分公有云资源为某个用户隔离出来，给这个用户私有使用的资源的集合。</p>
+<p><img src="https://raw.githubusercontent.com/Hack1ng4fun/Hack1ng4fun.github.io/Pics/VPC.png" alt="VPC与经典网络的区别"></p>
+<p>VPC 相对于经典网络来说，可细化配置的项更多，对应的一些安全隔离配置也允许进行更复杂的操作。</p>
+<ul>
+<li>网络ACL（Access Control List 访问控制列表）</li>
+</ul>
+<p>是一个子网级别无状态的可选安全层，用于控制进出子网的数据流，可以精确到协议和端口粒度。如下图所示，其规则与 安全组 相似，但由于网络 ACL 无状态的特性，设置入站规则允许某些访问后，如果没有设置相应的出站规则，也会导致无法响应访问。</p>
+<p><img src="https://raw.githubusercontent.com/Hack1ng4fun/Hack1ng4fun.github.io/Pics/ACL.png" alt="网络ACL 示意图"></p>
+<p>在使用一些云主机的时候，如果不是出于业务需要，建议都使用 VPC 网络，需要互相访问的业务可以放到同一个网络，然后再辅以安全组和ACL规则配置，就能最大限度地降低云主机或者数据服务等被入侵的风险。</p>
+<h3 id="业务安全"><a href="#业务安全" class="headerlink" title="业务安全"></a>业务安全</h3><h4 id="风险防控"><a href="#风险防控" class="headerlink" title="风险防控"></a>风险防控</h4><p>安全是对抗风险，所以业务安全其实就是属于业务风险的范畴。</p>
+<p><img src="https://raw.githubusercontent.com/Hack1ng4fun/Hack1ng4fun.github.io/Pics/sd9flsdm2pzl.png" alt="业务安全"></p>
+<p>常见保护方案</p>
+<ul>
+<li>登录保护<br>识别盗号、撞库、自动机登录、……</li>
+<li>注册保护<br>识别恶意注册、小号注册机、机器注册、……</li>
+<li>防刷保护<br>防范「薅羊毛」的行为。相关识别功能主要是分析用户的行为和帐号的风险等级，能有效地识别「羊毛党」。</li>
+<li>验证码</li>
+</ul>
+<p>识别技术的核心要点：</p>
+<ul>
+<li>数据采集、上报</li>
+<li>行为模型</li>
+<li>信誉库（IP库、设备库等）</li>
+</ul>
+<h4 id="内容安全"><a href="#内容安全" class="headerlink" title="内容安全"></a>内容安全</h4><blockquote>
+<p>互联网信息发布单位包括网络接入单位，从事信息服务的联网单位，开办电子公告版、新闻组、提供广播式发送电子邮件功能的联网单位等，这些信息发布单位必须建立和完善自己单位的互联网信息内容安全管理制度，严格依照法律规定进行信息内容安全管理，否则要承担相应的责任。</p>
+</blockquote>
+<ul>
+<li><p>主要的内容类型</p>
+<ul>
+<li>文字<ul>
+<li>聊天内容</li>
+<li>评论、留言、弹幕内容</li>
+<li>签名、昵称、个人介绍</li>
+<li>论坛发帖、回帖</li>
+<li>……</li>
+</ul>
+</li>
+<li>图片<ul>
+<li>头像、背景图</li>
+<li>评论、留言等里面的图片</li>
+<li>聊天中的图片</li>
+<li>文章、商品介绍中的图片</li>
+<li>……</li>
+</ul>
+</li>
+<li>视频<ul>
+<li>直播</li>
+<li>点播</li>
+<li>上传视频</li>
+<li>短视频</li>
+<li>……</li>
+</ul>
+</li>
+<li>音频<ul>
+<li>语音通信</li>
+<li>直播音频</li>
+<li>点播音频</li>
+<li>……</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>根据《计算机信息网络国际联网安全保护管理办法》规定，发布的信息不得含有以下内容：</p>
+<ul>
+<li>违反宪法所确定的基本原则</li>
+<li>危害国家安全，泄露国家秘密，煽动颠覆国家政权，破坏国家统一</li>
+<li>损害国家的荣誉和利益</li>
+<li>煽动民族仇恨、民族歧视，破坏民族团结</li>
+<li>破坏国家宗教政策，宣扬邪教，宣扬封建迷信</li>
+<li>散布谣言，编造和传播假新闻，扰乱社会秩序，破坏社会稳定</li>
+<li>散布淫秽、色情、赌博、暴力、恐怖或者教唆犯罪</li>
+<li>侮辱或者诽谤他人，侵害他人合法权益</li>
+<li>法律、法规禁止的其他内容</li>
+</ul>
+</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>勇敢的心
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://hack1ng4fun.github.io/2019/10/16/%E3%80%8C%E4%BA%91%E5%AE%89%E5%85%A8%E3%80%8D%E7%AF%87/" title="「云安全」篇">https://hack1ng4fun.github.io/2019/10/16/「云安全」篇/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E4%BA%91%E5%AE%89%E5%85%A8/" rel="tag"># 云安全</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2019/10/13/%E3%80%8C%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95%E3%80%8D%E7%AF%87/" rel="prev" title="「渗透测试」篇">
+      <i class="fa fa-chevron-left"></i> 「渗透测试」篇
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2019/11/18/Linux%E3%80%8C%E7%A3%81%E7%9B%98%E5%8A%A0%E5%AF%86%E3%80%8D%E5%AE%8C%E5%85%A8%E6%8C%87%E5%8D%97/" rel="next" title="Linux「磁盘加密」完全指南">
+      Linux「磁盘加密」完全指南 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+    
+  
+  <div class="comments">
+  <script src="https://utteranc.es/client.js" repo="Hack1ng4fun/Hack1ng4fun.github.io" issue-term="pathname" theme="github-light" crossorigin="anonymous" async></script>
+  </div>
+  
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#「云安全」篇"><span class="nav-number">1.</span> <span class="nav-text">「云安全」篇</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#云计算（cloud-computing）"><span class="nav-number">1.1.</span> <span class="nav-text">云计算（cloud computing）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#什么是「云计算」"><span class="nav-number">1.1.1.</span> <span class="nav-text">什么是「云计算」</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#「云计算」的定义"><span class="nav-number">1.1.2.</span> <span class="nav-text">「云计算」的定义</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#公有云-私有云-混合云"><span class="nav-number">1.1.3.</span> <span class="nav-text">公有云&#x2F;私有云&#x2F;混合云</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#云安全"><span class="nav-number">1.2.</span> <span class="nav-text">云安全</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#主机安全"><span class="nav-number">1.2.1.</span> <span class="nav-text">主机安全</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#「暴力破解」与「异地登录」"><span class="nav-number">1.2.1.1.</span> <span class="nav-text">「暴力破解」与「异地登录」</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#暴力破解"><span class="nav-number">1.2.1.1.1.</span> <span class="nav-text">暴力破解</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#异地登录"><span class="nav-number">1.2.1.1.2.</span> <span class="nav-text">异地登录</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#病毒木马与WebShell"><span class="nav-number">1.2.1.2.</span> <span class="nav-text">病毒木马与WebShell</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#在云主机上检测-WebShell-和病毒木马"><span class="nav-number">1.2.1.3.</span> <span class="nav-text">在云主机上检测 WebShell 和病毒木马</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#病毒木马的检测"><span class="nav-number">1.2.1.3.1.</span> <span class="nav-text">病毒木马的检测</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#WebShell-的检测"><span class="nav-number">1.2.1.3.2.</span> <span class="nav-text">WebShell 的检测</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#病毒木马与-WebShell-的处理"><span class="nav-number">1.2.1.3.3.</span> <span class="nav-text">病毒木马与 WebShell 的处理</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#服务器安全加固"><span class="nav-number">1.2.1.4.</span> <span class="nav-text">服务器安全加固</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#入侵检测"><span class="nav-number">1.2.1.5.</span> <span class="nav-text">入侵检测</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#主机内可以用来判断机器是否被入侵的信息"><span class="nav-number">1.2.1.5.1.</span> <span class="nav-text">主机内可以用来判断机器是否被入侵的信息</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#应用安全"><span class="nav-number">1.2.2.</span> <span class="nav-text">应用安全</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#云WAF"><span class="nav-number">1.2.2.1.</span> <span class="nav-text">云WAF</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#WAF的三种类型"><span class="nav-number">1.2.2.1.1.</span> <span class="nav-text">WAF的三种类型</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#网络安全"><span class="nav-number">1.2.3.</span> <span class="nav-text">网络安全</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#DDoS攻击"><span class="nav-number">1.2.3.1.</span> <span class="nav-text">DDoS攻击</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#几种特殊的、容易混淆的DDos类型"><span class="nav-number">1.2.3.1.1.</span> <span class="nav-text">几种特殊的、容易混淆的DDos类型</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#DDoS-防护"><span class="nav-number">1.2.3.1.2.</span> <span class="nav-text">DDoS 防护</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#云防火墙与安全组"><span class="nav-number">1.2.3.2.</span> <span class="nav-text">云防火墙与安全组</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#VPC（Virtual-Private-Cloud）"><span class="nav-number">1.2.3.3.</span> <span class="nav-text">VPC（Virtual Private Cloud）</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#业务安全"><span class="nav-number">1.2.4.</span> <span class="nav-text">业务安全</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#风险防控"><span class="nav-number">1.2.4.1.</span> <span class="nav-text">风险防控</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#内容安全"><span class="nav-number">1.2.4.2.</span> <span class="nav-text">内容安全</span></a></li></ol></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="勇敢的心"
+      src="https://raw.githubusercontent.com/Hack1ng4fun/Hack1ng4fun.github.io/Pics/mhyVJS.png">
+  <p class="site-author-name" itemprop="name">勇敢的心</p>
+  <div class="site-description" itemprop="description">Just for Fun</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">16</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">34</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="/rss2.xml" title="RSS → &#x2F;rss2.xml"><i class="fa fa-fw fa-rss"></i>RSS</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">勇敢的心</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    <span title="站点总字数">61k</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

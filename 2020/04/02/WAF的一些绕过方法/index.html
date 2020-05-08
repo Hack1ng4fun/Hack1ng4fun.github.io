@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon32.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon16.png">
+  <link rel="mask-icon" href="/images/favicon32.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-flash.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"hack1ng4fun.github.io","root":"/","scheme":"Gemini","version":"7.7.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="WAF的一些绕过方法WAF 全称为「Web应用防火墙」（Web Application Firewall），是网站常用来保护Web应用安全的一种安全产品。主要功能是通过检测客户端的请求内容，对具有潜在危险性的请求进行拦截，可以有效防御一些常见的针对 Web 应用的攻击（SQL注入、XSS、……）。 现在的中、大型网站基本都部署了 WAF 产品，作为一名渗透测试人员，如果没有掌握 WAF 的基本绕过">
+<meta property="og:type" content="article">
+<meta property="og:title" content="WAF的一些绕过方法">
+<meta property="og:url" content="https://hack1ng4fun.github.io/2020/04/02/WAF%E7%9A%84%E4%B8%80%E4%BA%9B%E7%BB%95%E8%BF%87%E6%96%B9%E6%B3%95/index.html">
+<meta property="og:site_name" content="勇敢的心">
+<meta property="og:description" content="WAF的一些绕过方法WAF 全称为「Web应用防火墙」（Web Application Firewall），是网站常用来保护Web应用安全的一种安全产品。主要功能是通过检测客户端的请求内容，对具有潜在危险性的请求进行拦截，可以有效防御一些常见的针对 Web 应用的攻击（SQL注入、XSS、……）。 现在的中、大型网站基本都部署了 WAF 产品，作为一名渗透测试人员，如果没有掌握 WAF 的基本绕过">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-04-02T11:37:23.000Z">
+<meta property="article:modified_time" content="2020-04-02T12:23:56.000Z">
+<meta property="article:author" content="勇敢的心">
+<meta property="article:tag" content="WAF">
+<meta property="article:tag" content="绕过">
+<meta property="article:tag" content="Web安全">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://hack1ng4fun.github.io/2020/04/02/WAF%E7%9A%84%E4%B8%80%E4%BA%9B%E7%BB%95%E8%BF%87%E6%96%B9%E6%B3%95/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>WAF的一些绕过方法 | 勇敢的心</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="勇敢的心" type="application/atom+xml">
+<link rel="alternate" href="/rss2.xml" title="勇敢的心" type="application/rss+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">勇敢的心</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://hack1ng4fun.github.io/2020/04/02/WAF%E7%9A%84%E4%B8%80%E4%BA%9B%E7%BB%95%E8%BF%87%E6%96%B9%E6%B3%95/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://raw.githubusercontent.com/Hack1ng4fun/Hack1ng4fun.github.io/Pics/mhyVJS.png">
+      <meta itemprop="name" content="勇敢的心">
+      <meta itemprop="description" content="Just for Fun">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="勇敢的心">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          WAF的一些绕过方法
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-04-02 19:37:23" itemprop="dateCreated datePublished" datetime="2020-04-02T19:37:23+08:00">2020-04-02</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/" itemprop="url" rel="index"><span itemprop="name">网络安全</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>1.5k</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="WAF的一些绕过方法"><a href="#WAF的一些绕过方法" class="headerlink" title="WAF的一些绕过方法"></a>WAF的一些绕过方法</h1><p>WAF 全称为「Web应用防火墙」（Web Application Firewall），是网站常用来保护Web应用安全的一种安全产品。主要功能是通过检测客户端的请求内容，对具有潜在危险性的请求进行拦截，可以有效防御一些常见的针对 Web 应用的攻击（SQL注入、XSS、……）。</p>
+<p>现在的中、大型网站基本都部署了 WAF 产品，作为一名渗透测试人员，如果没有掌握 WAF 的基本绕过方法，在渗透测试过程中会举步维艰。本文列举了一些常见的 WAF 绕过方法。</p>
+<a id="more"></a>
+
+<h2 id="HTTP-参数污染"><a href="#HTTP-参数污染" class="headerlink" title="HTTP 参数污染"></a>HTTP 参数污染</h2><ul>
+<li>由于 HTTP 协议允许同名参数存在，如果 WAF 对同名参数的处理方式不当，就会造成「参数污染」。<br>假设提交的参数为<code>id=1&amp;id=2&amp;id=3</code>，WAF 可能会解析为<code>id=1</code>，而后端的解析结果可能是<code>id=3</code>，这时候攻击者只需要把攻击内容放在第三个参数即可绕过 WAF 的检测。<br>这个方法非常古老了，现在已经基本行不通了，列出来只是为了提供一种思路。</li>
+</ul>
+<h2 id="HTTP-Header头欺骗"><a href="#HTTP-Header头欺骗" class="headerlink" title="HTTP Header头欺骗"></a>HTTP Header头欺骗</h2><ul>
+<li><p>有时候 WAF 会放行特定来源（比如本地 IP 地址）的请求包，这时候就可以通过伪造请求包的来源地址来绕过 WAF。相关 HTTP 报文字段：</p>
+<table>
+<thead>
+<tr>
+<th align="center">字段</th>
+<th align="center">值</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">X-Origination-IP</td>
+<td align="center">127.0.0.1</td>
+</tr>
+<tr>
+<td align="center">X-Forwarded-For</td>
+<td align="center">127.0.0.1</td>
+</tr>
+<tr>
+<td align="center">X-Remote-IP</td>
+<td align="center">127.0.0.1</td>
+</tr>
+<tr>
+<td align="center">X-Remote-Addr</td>
+<td align="center">127.0.0.1</td>
+</tr>
+<tr>
+<td align="center">X-Client-IP</td>
+<td align="center">127.0.0.1</td>
+</tr>
+<tr>
+<td align="center">X-Real-IP</td>
+<td align="center">127.0.0.1</td>
+</tr>
+</tbody></table>
+</li>
+</ul>
+<h2 id="HTTP-参数溢出"><a href="#HTTP-参数溢出" class="headerlink" title="HTTP 参数溢出"></a>HTTP 参数溢出</h2><p>这个方法和「参数污染」有点相似。</p>
+<ul>
+<li><p>一些 WAF 出于对性能的考虑，对一些参数非常多的请求只会检测其中一部分（比如前100个）参数，攻击者可以制造大量的无关参数用来「占位」，把真正的恶意参数放在后面。WAF 检测完前面一部分参数后没有发现问题，就放行了这个请求，这时候攻击者就成功绕过了 WAF 的检测，把恶意参数带入了后端。</p>
+</li>
+<li><p>同样是出于对性能的考虑，一些 WAF 对于超长（超大）的数据包也会跳过（不检测）。</p>
+</li>
+</ul>
+<h2 id="HTTP-分块传输（Chunked）"><a href="#HTTP-分块传输（Chunked）" class="headerlink" title="HTTP 分块传输（Chunked）"></a>HTTP 分块传输（Chunked）</h2><p>「分块传输」（Chunked Transfer Coding）是一种传输编码，把报文分割成若干个大小已知的「块」进行传输。</p>
+<ul>
+<li>在请求报文的<code>Transfer-Encoding</code>字段中指定为<code>chunked</code>值来声明采用「分块传输」，把数据分割成若干份来绕过 WAF 的检测。</li>
+</ul>
+<h2 id="HTTP-数据编码（Charset）"><a href="#HTTP-数据编码（Charset）" class="headerlink" title="HTTP 数据编码（Charset）"></a>HTTP 数据编码（Charset）</h2><p>利用报文头<code>Content-Type</code>指定一个特殊编码，使服务器可以正常解析但 WAF 无法解析请求包内容，从而绕过 WAF。</p>
+<h2 id="HTTP-Pipline（Kepp-Alive）"><a href="#HTTP-Pipline（Kepp-Alive）" class="headerlink" title="HTTP Pipline（Kepp-Alive）"></a>HTTP Pipline（Kepp-Alive）</h2><p>HTTP 管道化允许多个 HTTP 请求通过一个套接字同时被输出，而不用等待相应的响应。然后请求者会等待各自的响应，这些响应是按照之前的请求顺序依次到达。因为多个请求可被同时传送，如果 WAF 只检测第一个请求而忽略了后面的请求，就可以被绕过。</p>
+<h2 id="HTTP-协议未覆盖"><a href="#HTTP-协议未覆盖" class="headerlink" title="HTTP 协议未覆盖"></a>HTTP 协议未覆盖</h2><p>通过修改参数提交方式导致 WAF 使用错误的方式检测请求内容，从而绕过 WAF。</p>
+<h2 id="HTTP-畸形包"><a href="#HTTP-畸形包" class="headerlink" title="HTTP 畸形包"></a>HTTP 畸形包</h2><p>当前的 HTTP 服务依据的是 RFC2616 标准（通常有以下八种方法：OPTIONS、GET、HEAD、POST、PUT、DELETE、TRACE、CONNECT）的 HTTP 请求，但是当向 Web 服务器发送畸形请求（非标准的 HTTP 数据包）时，由于 Web 服务器的一些兼容性的特性，会尽力解析这些畸形的数据包，而 WAF 处理这种畸形包时就可能不拦截。</p>
+<h2 id="HTTP-组合绕过"><a href="#HTTP-组合绕过" class="headerlink" title="HTTP 组合绕过"></a>HTTP 组合绕过</h2><p>以上列举的方法并不是一定要独立使用，可以灵活地根据情况组合使用，成功绕过的机率也会提高。</p>
+<p>更多关于绕过 WAF 的方法，推荐阅读<a href="https://xz.aliyun.com/t/15" target="_blank" rel="noopener">这篇文章</a>。</p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>勇敢的心
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://hack1ng4fun.github.io/2020/04/02/WAF%E7%9A%84%E4%B8%80%E4%BA%9B%E7%BB%95%E8%BF%87%E6%96%B9%E6%B3%95/" title="WAF的一些绕过方法">https://hack1ng4fun.github.io/2020/04/02/WAF的一些绕过方法/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/WAF/" rel="tag"># WAF</a>
+              <a href="/tags/%E7%BB%95%E8%BF%87/" rel="tag"># 绕过</a>
+              <a href="/tags/Web%E5%AE%89%E5%85%A8/" rel="tag"># Web安全</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/03/31/%E9%9D%B6%E6%9C%BA-DevRandom-CTF-1-1/" rel="prev" title="靶机-DevRandom CTF:1.1">
+      <i class="fa fa-chevron-left"></i> 靶机-DevRandom CTF:1.1
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+    
+  
+  <div class="comments">
+  <script src="https://utteranc.es/client.js" repo="Hack1ng4fun/Hack1ng4fun.github.io" issue-term="pathname" theme="github-light" crossorigin="anonymous" async></script>
+  </div>
+  
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#WAF的一些绕过方法"><span class="nav-number">1.</span> <span class="nav-text">WAF的一些绕过方法</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#HTTP-参数污染"><span class="nav-number">1.1.</span> <span class="nav-text">HTTP 参数污染</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HTTP-Header头欺骗"><span class="nav-number">1.2.</span> <span class="nav-text">HTTP Header头欺骗</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HTTP-参数溢出"><span class="nav-number">1.3.</span> <span class="nav-text">HTTP 参数溢出</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HTTP-分块传输（Chunked）"><span class="nav-number">1.4.</span> <span class="nav-text">HTTP 分块传输（Chunked）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HTTP-数据编码（Charset）"><span class="nav-number">1.5.</span> <span class="nav-text">HTTP 数据编码（Charset）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HTTP-Pipline（Kepp-Alive）"><span class="nav-number">1.6.</span> <span class="nav-text">HTTP Pipline（Kepp-Alive）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HTTP-协议未覆盖"><span class="nav-number">1.7.</span> <span class="nav-text">HTTP 协议未覆盖</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HTTP-畸形包"><span class="nav-number">1.8.</span> <span class="nav-text">HTTP 畸形包</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HTTP-组合绕过"><span class="nav-number">1.9.</span> <span class="nav-text">HTTP 组合绕过</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="勇敢的心"
+      src="https://raw.githubusercontent.com/Hack1ng4fun/Hack1ng4fun.github.io/Pics/mhyVJS.png">
+  <p class="site-author-name" itemprop="name">勇敢的心</p>
+  <div class="site-description" itemprop="description">Just for Fun</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">16</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">34</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="/rss2.xml" title="RSS → &#x2F;rss2.xml"><i class="fa fa-fw fa-rss"></i>RSS</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">勇敢的心</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    <span title="站点总字数">61k</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

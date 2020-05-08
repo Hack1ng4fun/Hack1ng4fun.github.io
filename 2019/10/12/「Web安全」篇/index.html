@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon32.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon16.png">
+  <link rel="mask-icon" href="/images/favicon32.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-flash.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"hack1ng4fun.github.io","root":"/","scheme":"Gemini","version":"7.7.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="「Web安全」篇扫盲Web安全领域的主流漏洞，深入了解漏洞的产生原理以及对应的防御方法。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="「Web安全」篇">
+<meta property="og:url" content="https://hack1ng4fun.github.io/2019/10/12/%E3%80%8CWeb%E5%AE%89%E5%85%A8%E3%80%8D%E7%AF%87/index.html">
+<meta property="og:site_name" content="勇敢的心">
+<meta property="og:description" content="「Web安全」篇扫盲Web安全领域的主流漏洞，深入了解漏洞的产生原理以及对应的防御方法。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://raw.githubusercontent.com/Hack1ng4fun/Hack1ng4fun.github.io/Pics/render.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Hack1ng4fun/Hack1ng4fun.github.io/Pics/sd92ks9zk.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Hack1ng4fun/Hack1ng4fun.github.io/Pics/csrf.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Hack1ng4fun/Hack1ng4fun.github.io/Pics/clickjacking.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Hack1ng4fun/Hack1ng4fun.github.io/Pics/orderby.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Hack1ng4fun/Hack1ng4fun.github.io/Pics/dichotomy.png">
+<meta property="article:published_time" content="2019-10-12T04:46:48.000Z">
+<meta property="article:modified_time" content="2020-03-26T12:58:02.000Z">
+<meta property="article:author" content="勇敢的心">
+<meta property="article:tag" content="Web安全">
+<meta property="article:tag" content="Web安全基础">
+<meta property="article:tag" content="Web安全入门">
+<meta property="article:tag" content="Web漏洞">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/Hack1ng4fun/Hack1ng4fun.github.io/Pics/render.png">
+
+<link rel="canonical" href="https://hack1ng4fun.github.io/2019/10/12/%E3%80%8CWeb%E5%AE%89%E5%85%A8%E3%80%8D%E7%AF%87/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>「Web安全」篇 | 勇敢的心</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="勇敢的心" type="application/atom+xml">
+<link rel="alternate" href="/rss2.xml" title="勇敢的心" type="application/rss+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">勇敢的心</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://hack1ng4fun.github.io/2019/10/12/%E3%80%8CWeb%E5%AE%89%E5%85%A8%E3%80%8D%E7%AF%87/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://raw.githubusercontent.com/Hack1ng4fun/Hack1ng4fun.github.io/Pics/mhyVJS.png">
+      <meta itemprop="name" content="勇敢的心">
+      <meta itemprop="description" content="Just for Fun">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="勇敢的心">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          「Web安全」篇
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-10-12 12:46:48" itemprop="dateCreated datePublished" datetime="2019-10-12T12:46:48+08:00">2019-10-12</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/" itemprop="url" rel="index"><span itemprop="name">网络安全</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>17k</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="「Web安全」篇"><a href="#「Web安全」篇" class="headerlink" title="「Web安全」篇"></a>「Web安全」篇</h1><p>扫盲Web安全领域的主流漏洞，深入了解漏洞的产生原理以及对应的防御方法。</p>
+<a id="more"></a>
+
+<h2 id="浏览器"><a href="#浏览器" class="headerlink" title="浏览器"></a>浏览器</h2><h3 id="浏览器机制"><a href="#浏览器机制" class="headerlink" title="浏览器机制"></a>浏览器机制</h3><h4 id="同源策略"><a href="#同源策略" class="headerlink" title="同源策略"></a>同源策略</h4><ul>
+<li><p>不同域的客户端脚本在没明确授权的情况下，不能读写对方的资源。</p>
+</li>
+<li><p>同一个域的定义</p>
+<ul>
+<li>协议相同</li>
+<li>域名相同</li>
+<li>端口相同</li>
+</ul>
+</li>
+<li><p>如果在未授权的情况下发起一个跨源请求，将会被浏览器拦截，并报错：<code>CORS头缺少&#39;Access-Control-Allow-Origin&#39;</code>，也就是缺少必要的HTTP头。浏览器实际上是拦截了跨源请求的响应。</p>
+</li>
+<li><p>虽然有同源策略在，但是是可以协商的。只要被请求的一方用某种方式允许了你的访问，就可以突破同源策略的限制。</p>
+</li>
+<li><p>业务上常见的允许跨源的例子</p>
+<ul>
+<li>jsonp<br>jsonp的本质是跨源的对方给你一段JavaScript脚本让你执行，而script标签的src属性是允许跨源的，所以达到了跨源的目的。</li>
+<li>CORS<br>CORS的原理是被请求的服务端获取到发出请求方的请求后，给响应头加上<code>AccessControl-Allow-Origin</code>相关信息，浏览器就会对响应放行，让对方拿到数据。</li>
+<li>WebSocket<br>WebSocket是一种通信协议，使用<strong>ws://</strong>(非加密) 和<strong>wss://</strong>(加密) 作为协议前缀。该协议不实行同源策略，只要服务器支持，就可以通过它进行跨源通信。</li>
+</ul>
+</li>
+</ul>
+<h4 id="浏览器渲染机制"><a href="#浏览器渲染机制" class="headerlink" title="浏览器渲染机制"></a>浏览器渲染机制</h4><ul>
+<li>HTML、CSS、JS的解析顺序<br><strong>HTML &gt; CSS &gt; JS</strong></li>
+<li>浏览器的解码顺序<br><strong>HTML &gt; URL &gt; JS</strong></li>
+</ul>
+<p><img src="https://raw.githubusercontent.com/Hack1ng4fun/Hack1ng4fun.github.io/Pics/render.png" alt="浏览器渲染页面到屏幕上的主流程"></p>
+<h3 id="浏览器安全策略"><a href="#浏览器安全策略" class="headerlink" title="浏览器安全策略"></a>浏览器安全策略</h3><h4 id="CSP内容安全策略（Content-Security-Policy）"><a href="#CSP内容安全策略（Content-Security-Policy）" class="headerlink" title="CSP内容安全策略（Content Security Policy）"></a>CSP内容安全策略（Content Security Policy）</h4><ul>
+<li>什么是CSP？<br>为了缓解很大一部分潜在的跨站脚本问题，浏览器的拓展程序引入了CSP的概念。这将引入一些非常严格的安全策略，会使拓展程序在默认情况下更加安全。开发者可以创建并强制应用一些规则，管理网站加载的内容。简单来说，我们的网站只接受我们指定的资源。</li>
+<li>CSP的意义<br> 等同防XSS等攻击的利器。CSP 的实质就是白名单制度，开发者明确告诉客户端，哪些外部资源可以加载和执行，等同于提供白名单。它的实现和执行全部由浏览器完成，开发者只需提供配置。CSP 大大增强了网页的安全性。攻击者即使发现了漏洞，也没法注入脚本，除非还控制了一台列入了白名单的可信主机。</li>
+<li>CSP的使用方法<ul>
+<li>在HTTP Header上使用（首选）<ul>
+<li><code>Content-Security-Policy:&quot;策略&quot;</code></li>
+<li><code>Content-Security-Policy-Report-Only:&quot;策略&quot;</code></li>
+</ul>
+</li>
+<li>在HTML上使用<ul>
+<li><code>&lt;meta http-equiv=&quot;content-security-policy&quot; content=&quot;策略&quot;&gt;</code></li>
+<li><code>&lt;meta http-equiv=&quot;content-security-policy-report-only&quot; content=&quot;策略&quot;&gt;</code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p><strong>虽然CSP可以控制的策略非常多，但在实际应用中很少有企业能把它设置正确。</strong></p>
+<h4 id="Cookie安全"><a href="#Cookie安全" class="headerlink" title="Cookie安全"></a>Cookie安全</h4><ul>
+<li>主要是domain、path、secure和HttpOnly的组合</li>
+</ul>
+<h4 id="iframe沙盒"><a href="#iframe沙盒" class="headerlink" title="iframe沙盒"></a>iframe沙盒</h4><ul>
+<li>iframe沙盒框架是对常规&lt;iframe&gt;表现行为的拓展</li>
+<li>它能让顶级页面对其嵌入的子页面及这些子页面的子资源设置一些额外的限制</li>
+<li>通过设置&lt;iframe&gt;的<strong>sandbox</strong>属性实现限制</li>
+</ul>
+<h4 id="flash安全沙箱"><a href="#flash安全沙箱" class="headerlink" title="flash安全沙箱"></a>flash安全沙箱</h4><ul>
+<li>Flash的安全沙箱其实和同源策略有关，主要是针对跨源请求的，需要在被请求的站点下的<strong>crossdomain.xml</strong>路径下用xml的格式输出允许跨源请求的站点。</li>
+<li>现在flash逐渐被淘汰，对于这个策略，了解即可。</li>
+</ul>
+<h2 id="OWASP"><a href="#OWASP" class="headerlink" title="OWASP"></a>OWASP</h2><ul>
+<li>什么是OWASP？</li>
+</ul>
+<p>OWASP（Open Web Application Security Project）即「开放式Web应用程序安全项目」。是一个开源的、非盈利的全球性安全组织，主要致力于应用软件的安全研究。组织使命是使应用软件更加安全，使企业和组织能够对应用安全风险作出更清晰的决策。</p>
+<p>主要成果是共同推动了安全标准、安全测试工具、安全指导手册等应用安全技术的发展。OWASP被视为Web应用安全领域的权威。</p>
+<h3 id="OWASP-TOP-10"><a href="#OWASP-TOP-10" class="headerlink" title="OWASP TOP 10"></a>OWASP TOP 10</h3><p><strong>OWASP TOP 10</strong>被用来分类网络安全漏洞的严重程度，目前被许多漏洞奖励平台和企业安全团队引用。</p>
+<p>这个列表总结了Web应用程序最可能、最常见、最危险的十大漏洞，IT公司和开发团队可以利用这个列表来规范应用程序开发流程和测试流程，提高Web产品的安全性。</p>
+<p>基本所有的Web漏洞扫描都会被要求满足<strong>OWASP TOP10</strong>的检测，同时相关企业在招聘Web安全人才的时候也要求掌握<strong>OWASP TOP 10</strong>。</p>
+<p><strong>OWASP TOP 10</strong>是隔几年发一次，最近的两次<strong>OWASP TOP 10</strong>分别是「2017版」和「2013版」。</p>
+<h4 id="OWASP-TOP-10-2017版"><a href="#OWASP-TOP-10-2017版" class="headerlink" title="OWASP TOP 10 2017版"></a>OWASP TOP 10 2017版</h4><ol>
+<li><p>注入（injection）<br>将不受信任的数据作为命令或查询的一部分发送到解析器时，会产生诸如SQL注入、NoSQL注入、OS注入和LDAP注入的注入缺陷。攻击者的恶意数据可以诱使解析器在没有适当授权的情况下执行非预期命令或访问数据。</p>
+</li>
+<li><p>失效的身份认证（Broken Authentication）<br>通常，通过错误使用应用程序的身份认证和会话管理功能，攻击者能够破译密码、密钥或会话令牌， 或者利用其它开发缺陷来暂时性或永久性冒充其他用户的身份。<br>主要是指比如密码破解、会话劫持等身份认证相关漏洞。</p>
+</li>
+<li><p>敏感数据泄露（Sensitive Data Exposure）<br>许多Web应用程序和API都无法正确保护敏感数据，例如：财务数据、医疗数据和PII数据。攻击者可以通过窃取或修改未加密的数据来实施信用卡诈骗、身份盗窃或其他犯罪行为。未加密的敏感数据容易受到破坏，因此，我们需要对敏感数据加密，这些数据包括：传输过程中的数据、存储的数据 以及浏览器的交互数据。</p>
+</li>
+<li><p>XML外部实体（XML External Entities）<br>许多较早的或配置错误的XML处理器评估了XML文件中的外部实体引用。攻击者可以利用外部实体窃 取使用URI文件处理器的内部文件和共享文件、监听内部扫描端口、执行远程代码和实施拒绝服务攻击。<br>就是指<strong>XXE</strong>这种漏洞类型。</p>
+</li>
+<li><p>失效的访问控制（Broken Access Control）<br>未对通过身份验证的用户实施恰当的访问控制。攻击者可以利用这些缺陷访问未经授权的功能或数据，例如：访问其他用户的帐户、查看敏感文件、修改其他用户的数据、更改访问权限等。<br>比如说未授权访问、越权漏洞等都属于这一类型。</p>
+</li>
+<li><p>安全配置错误（Security Misconfiguration）<br>安全配置错误是最常见的安全问题，这通常是由于不安全的默认配置、不完整的临时配置、开源云 存储、错误的 HTTP 标头配置以及包含敏感信息的详细错误信息所造成的。因此，我们不仅需要对所有的操作系统、框架、库和应用程序进行安全配置，而且必须及时修补和升级它们。</p>
+</li>
+<li><p>跨站脚本（Cross-Site Scripting）<br>当应用程序的新网页中包含不受信任的、未经恰当验证或转义的数据时，或者使用可以创建 HTML或 JavaScript 的浏览器 API 更新现有的网页时，就会出现 XSS 缺陷。XSS 让攻击者能够在受害者的浏览器 中执行脚本，并劫持用户会话、破坏网站或将用户重定向到恶意站点。<br>特指XSS这个漏洞类型。</p>
+</li>
+<li><p>不安全的反序列化（Insecure Deserialazation）<br>不安全的反序列化会导致远程代码执行。即使反序列化缺陷不会导致远程代码执行，攻击者也可以 利用它们来执行攻击，包括：重播攻击、注入攻击和特权升级攻击。<br>比如JAVA反序列等。</p>
+</li>
+<li><p>使用含有已知漏洞的组件（ Useing Components with Known Vulnerabilities）<br>组件（例如：库、框架和其他软件模块）拥有和应用程序相同的权限。如果应用程序中含有已知漏 洞的组件被攻击者利用，可能会造成严重的数据丢失或服务器接管。同时，使用含有已知漏洞的组 件的应用程序和API可能会破坏应用程序防御、造成各种攻击并产生严重影响。<br>这类型也比较好理解，比如Linux里使用存在破壳漏洞的bash版本，就属于这个类型，通用组件漏洞。</p>
+</li>
+<li><p>不足的日志记录和监控（Insufficient Logging&amp;Monitoring）<br>不足的日志记录和监控，以及事件响应缺失或无效的集成，使攻击者能够进一步攻击系统、保持持续性或转向更多系统，以及篡改、提取或销毁数据。大多数缺陷研究显示，缺陷被检测出的时间超 过200天，且通常通过外部检测方检测，而不是通过内部流程或监控检测。<br>比如由于缺乏相关的日志记录和监控，导致相关入侵无法被及时发现，或者被发现后无法进行相关的溯源。</p>
+</li>
+</ol>
+<h2 id="常见Web漏洞"><a href="#常见Web漏洞" class="headerlink" title="常见Web漏洞"></a>常见Web漏洞</h2><h3 id="跨站脚本攻击-XSS"><a href="#跨站脚本攻击-XSS" class="headerlink" title="跨站脚本攻击(XSS)"></a>跨站脚本攻击(XSS)</h3><p>攻击者往Web页面里插入恶意的Script代码，当用户访问该页面时，嵌入其中的恶意代码将会被执行，从而达到恶意攻击用户的目的。XSS还经常和CSRF漏洞结合利用，以造成更大的危害。</p>
+<h4 id="主流XSS类型"><a href="#主流XSS类型" class="headerlink" title="主流XSS类型"></a>主流XSS类型</h4><ul>
+<li>DOM型XSS</li>
+<li>反射型XSS</li>
+<li>存储型XSS</li>
+</ul>
+<h4 id="其他XSS类型"><a href="#其他XSS类型" class="headerlink" title="其他XSS类型"></a>其他XSS类型</h4><ul>
+<li><p>mXSS 突变型XSS<br>由于编码等问题导致Payload变异而产生的XSS</p>
+</li>
+<li><p>UXSS 通用型XSS<br>利用浏览器或者浏览器拓展漏洞来制造产生XSS的条件并执行代码的一种攻击类型<br>一般导致的后果就是Bypass同源策略<br>严格来说UXSS应该算不上传统的XSS</p>
+</li>
+<li><p>FlashXSS<br>由Flash导致的XSS<br>问题主要出现在Flash的实现代码上</p>
+</li>
+<li><p>只存在于低版本IE浏览器的XSS（少见）</p>
+<ul>
+<li><p>UTF-7 XSS<br>特定IE版本下以UTF-7编码处理网页内容，导致XSS。<br>UTF-7编码场景下的XSS，对应攻击Payload也要转换为UTF-7编码的结果。</p>
+</li>
+<li><p>MHTML XSS<br>IE浏览器下的一种特殊类型的XSS，因为是源于仅限低版本IE浏览器支持的一个MHTML协议进行攻击的。</p>
+</li>
+<li><p>CSS XSS<br>由于CSS支持的特性导致只在低版本IE下可能导致的XSS。</p>
+</li>
+<li><p>VBScript XSS<br>仅在低版本IE下支持的由VBScript语句构建的XSS。</p>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="XSS攻击和防御"><a href="#XSS攻击和防御" class="headerlink" title="XSS攻击和防御"></a>XSS攻击和防御</h4><ul>
+<li><p>挖掘XSS漏洞步骤</p>
+<ol>
+<li>寻找注入点</li>
+<li>查看提交的内容是否注入到了页面</li>
+<li>根据注入点位置的DOM结构，构造Payload</li>
+</ol>
+</li>
+<li><p>XSS利用</p>
+<ul>
+<li>JavaScript能做的，它都能做。<ul>
+<li>内网端口扫描</li>
+<li>信息收集</li>
+<li>执行代码</li>
+<li>通过BeEF平台丰富的XSS工具进行利用</li>
+<li>……</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>XSS盲打<br>不管提交什么内容，页面都只会返回特定相同的内容，而不会因为提交的内容不同而不同。<br>这种情况下无法通过页面返回的内容来判断提交的XSS代码是否执行成功，这时候就需要用到「XSS盲打平台」。</p>
+</li>
+<li><p>XSS盲打平台<br>将XSS盲打平台生成的XSS代码插入到漏洞点（怀疑有漏洞的位置），如果XSS代码被成功执行了，那么在XSS盲打平台的后台就能看到相应的信息，表明此处存在XSS漏洞。<br><img src="https://raw.githubusercontent.com/Hack1ng4fun/Hack1ng4fun.github.io/Pics/sd92ks9zk.png" alt="XSS盲打平台"></p>
+</li>
+<li><p>XSS防御</p>
+<ul>
+<li>针对 script 等特殊标签做HTML转义，让Payload失效。</li>
+<li>WAF</li>
+<li>CSP（内容安全策略）</li>
+<li>语言开发框架</li>
+</ul>
+</li>
+</ul>
+<h3 id="跨站请求伪造-CSRF"><a href="#跨站请求伪造-CSRF" class="headerlink" title="跨站请求伪造(CSRF)"></a>跨站请求伪造(CSRF)</h3><p>可以在受害者毫不知情的情况下，以受害者的名义伪造请求，发送给受攻击的站点。从而在并未授权的情况下执行在权限保护之下的操作。</p>
+<p><img src="https://raw.githubusercontent.com/Hack1ng4fun/Hack1ng4fun.github.io/Pics/csrf.png" alt="CSRF 攻击原理"></p>
+<p>攻击的前提条件：必须是在用户登录了网站的基础上，用同个浏览器去访问攻击者构造的钓鱼页面。（向网站发送请求时才会携带网站的用户Cookie，才能攻击成功。）</p>
+<h4 id="CSRF漏洞的利用"><a href="#CSRF漏洞的利用" class="headerlink" title="CSRF漏洞的利用"></a>CSRF漏洞的利用</h4><p>假设某网站，在修改用户密码的位置存在CSRF漏洞，用户在修改密码时会发送如下一个请求：<br><code>http://localhost/?passwd=1234&amp;submit=submit</code><br><code>passwd</code>字段是用户的新密码</p>
+<p>在用户登录状态下访问这个URL，用户的密码就会被修改为<code>passwd</code>字段的值（1234）。</p>
+<p>攻击者构造了如下一个钓鱼页面：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">img</span> <span class="attr">src</span>=<span class="string">"1.jpg"</span> <span class="attr">width</span>=<span class="string">"300px"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">iframe</span> <span class="attr">style</span>=<span class="string">"display:none;"</span> <span class="attr">src</span>=<span class="string">"http://localhost/?passwd=hacked&amp;submit=submit"</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>假设用户当前是登录状态，当用户打这个钓鱼页面时，用户只会看到一个美女图片（1.jpg），实际上他的密码已经被修改为 hacked（通过一个隐藏的iframe标签向网站发送了一个修改密码的请求）。这个例子就是攻击者通过CSRF漏洞，以用户的身份修改了用户密码。<br>CSRF漏洞具体能做到什么，要看出现漏洞的具体功能点，如果银行转账功能出现CSRF漏洞，那么攻击者就能通过漏洞转走你账户的钱……</p>
+<h4 id="CSRF的防御手段"><a href="#CSRF的防御手段" class="headerlink" title="CSRF的防御手段"></a>CSRF的防御手段</h4><ul>
+<li><p>构造随机内容的提交参数</p>
+<ul>
+<li>增加随机参数（验证码、Token、……）</li>
+</ul>
+</li>
+<li><p>验证HTTP请求是否正常</p>
+<ul>
+<li>验证HTTP请求的Referer</li>
+</ul>
+</li>
+</ul>
+<p>具体功能增加防护措施的时候，可以根据功能场景进行改进。</p>
+<h3 id="目录穿越（目录遍历）与文件包含"><a href="#目录穿越（目录遍历）与文件包含" class="headerlink" title="目录穿越（目录遍历）与文件包含"></a>目录穿越（目录遍历）与文件包含</h3><h4 id="目录穿越"><a href="#目录穿越" class="headerlink" title="目录穿越"></a>目录穿越</h4><p>由于Web服务器或Web应用程序对用户输入文件名称的安全性验证不足而导致的一种安全漏洞。<br>可绕过服务器的安全限制，访问任意受限的文件（可以是Web根目录以外的文件，比如：数据库配置文件、Linux的密码文件），甚至执行系统命令。</p>
+<p>典型的目录穿越漏洞：<br><code>http://localhost/file.php?filename=../../../../../../etc/passwd</code><br><code>..</code>代表的是上一层目录，这里的<code>../../../../../../etc/passwd</code>意思是往前跳多层目录，直到跳到根目录下，再加上要读取的文件路径：<code>/etc/passwd</code>，就实现了读取Web服务器系统的任意文件。</p>
+<h4 id="文件包含"><a href="#文件包含" class="headerlink" title="文件包含"></a>文件包含</h4><p>在开发的时候会有一些共用的代码，在多个文件中会复用，开发人员往往会把这样的代码或者方法写在一个文件里，通过文件包含的方法直接包含到代码里进行使用。</p>
+<p>#####　本地文件包含</p>
+<p>假设网站有如下两个PHP文件：</p>
+<p>file.php：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span> <span class="keyword">include</span>($_GET[<span class="string">'filename'</span>]); <span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>phpinfo.php：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span> <span class="keyword">echo</span> phpinfo(); <span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>那么当访问<code>http://localhost/file.php?filename=phpinfo.php</code>时，<code>phpinfo.php</code>文件就会被包含到<code>file.php</code>中执行，最后就会打印出phpinfo信息。<br><code>file.php</code>在包含文件的时候并没有对<code>$_GET[&#39;filename&#39;]</code>的值做相关的处理，「filename」的参数可以是任意的，这就意味着这里存在「本地文件包含漏洞」。</p>
+<h5 id="远程文件包含"><a href="#远程文件包含" class="headerlink" title="远程文件包含"></a>远程文件包含</h5><p>既然有「本地文件包含」，那自然也有「远程文件包含」啦，如果<code>php.ini</code>的配置选项<code>allow_url_fopen</code>和<code>allow_url_include</code>都为 ON 的话，被包含的文件就可以是HTTP的URL形式或者是<code>php://</code>、<code>data://</code>等特殊协议，意味着可以包含（执行）远程的文件。<br>被包含的远程PHP文件，后缀名应该改为txt，否则读取到的会是远程PHP文件被解析后的结果。</p>
+<p>在利用「文件包含漏洞」的时候，经常会结合「目录穿越漏洞」来读取<code>/etc/passwd</code>等敏感文件。</p>
+<h4 id="文件包含和目录穿越的防御"><a href="#文件包含和目录穿越的防御" class="headerlink" title="文件包含和目录穿越的防御"></a>文件包含和目录穿越的防御</h4><ul>
+<li>设置白名单<br>将要包含的文件都写入到白名单，非白名单的包含文件都直接拒绝。</li>
+<li>设置<code>php.ini</code>相关配置选项<ul>
+<li>关闭远程文件包含<br>关闭<code>allow_url_fopen</code>和<code>allow_url_include</code>选项</li>
+<li>设置<code>open_basedir</code>选项<br>通过设置<code>open_basedir</code>选项的值，将允许访问（包含）的文件限定在某一特定目录内。</li>
+</ul>
+</li>
+</ul>
+<h3 id="JSONP（JSON-with-Padding）安全与防御"><a href="#JSONP（JSON-with-Padding）安全与防御" class="headerlink" title="JSONP（JSON with Padding）安全与防御"></a>JSONP（JSON with Padding）安全与防御</h3><h4 id="什么是-JSONP"><a href="#什么是-JSONP" class="headerlink" title="什么是 JSONP"></a>什么是 JSONP</h4><p>基于 JSON 格式，为解决跨域请求资源而产生的解决方案。<br>它的基本原理是利用script元素标签远程调用JSON文件来实现数据传递。</p>
+<h4 id="JSON劫持（JSON-Hijacking）"><a href="#JSON劫持（JSON-Hijacking）" class="headerlink" title="JSON劫持（JSON Hijacking）"></a>JSON劫持（JSON Hijacking）</h4><p>典型的JSON劫持攻击是通过定义一个跟JSON接口中callback参数值相同的函数来接收JSON接口的数据，以此获取到目标用户敏感信息。</p>
+<p>JSON劫持和CSRF非常相似，JSON劫持也可以理解为CSRF的一种应用场景，它们的攻击手法也基本相同，只不过CSRF的目的是发送请求，而JSON劫持是为了获取用户的敏感信息。攻击者首先诱导受害者进入钓鱼页面，钓鱼页面会向网站的JSON接口发送请求，用户如果当前是登录状态，发送请求时就会携带网站的用户Cookie，网站就会返回相关的用户信息，攻击者就成功获取到了用户的敏感信息。</p>
+<h4 id="JSONP-的安全问题"><a href="#JSONP-的安全问题" class="headerlink" title="JSONP 的安全问题"></a>JSONP 的安全问题</h4><p>如果「callback参数」可以随意修改，是可控的话，还可能导致XSS漏洞。存在XSS的前提是<strong>接口返回内容的<code>Content-Type</code>设置不正确</strong>（或者没有设置），就有可能导致XSS漏洞的产生。</p>
+<p>除了由于自定义callback函数名可以导致XSS以外，由于这个函数的自定义问题以及开发者在编码等方面的开发不严谨，也可能会导致其他一些不常见的安全问题，这里不再深入。</p>
+<h4 id="JSON劫持的防御"><a href="#JSON劫持的防御" class="headerlink" title="JSON劫持的防御"></a>JSON劫持的防御</h4><ul>
+<li>验证调用方（referer、……）</li>
+<li>增加随机Token</li>
+</ul>
+<h4 id="XSS问题的防御"><a href="#XSS问题的防御" class="headerlink" title="XSS问题的防御"></a>XSS问题的防御</h4><ul>
+<li>对callback函数的长度进行限制<br>XSS的Payload往往必须要有一定的长度，才能产生真实的危害。</li>
+<li>对内容（callback参数值、返回内容）进行特殊字符的过滤</li>
+</ul>
+<h3 id="HTML5-安全问题与防御"><a href="#HTML5-安全问题与防御" class="headerlink" title="HTML5 安全问题与防御"></a>HTML5 安全问题与防御</h3><p>HTML5 是定义 HTML 标准的最新的版本，它是HTML的第五次重大修改，标准于14年10月29日完成。</p>
+<p>作为 HTML 的升级版，HTML5 引入了更多的标签、属性、方法、功能、……安全问题都是伴随着功能出现的，HTML5 自然而然就产生了一些可以被利用的安全问题，或者说，扩大了原来的一些攻击方法的攻击面/攻击点。</p>
+<h4 id="XSS"><a href="#XSS" class="headerlink" title="XSS"></a>XSS</h4><p>HTML5 带来的新标签、新属性为XSS恶意代码「绕过WAF等防护设备的黑名单机制」提供了便利：可以尝试使用更多不同的标签、属性绕过防护设备的安全检测，执行恶意代码。这方面的防御主要看防护产品是否增加了对新标签、新属性的检测。</p>
+<h4 id="CORS（跨域资源共享）"><a href="#CORS（跨域资源共享）" class="headerlink" title="CORS（跨域资源共享）"></a>CORS（跨域资源共享）</h4><p>CORS是一个W3C标准，全称是「跨域资源共享」（Cross-origin resource sharing）。它允许浏览器向跨源服务器，发出XMLHttpRequest请求，从而克服了AJAX只能同源使用的限制。</p>
+<p>服务端在响应头中设置<code>Access-Control-Allow-Origin</code>字段来表明接受哪些网站的跨域请求（还有其他几个与CORS请求相关的字段，这里只讲最重要的这个），如果开发人员偷懒，为了方便，将<code>Access-Control-Allow-Origin</code>字段的值设置为「<em>」的话，这表明接受任何网站的跨域请求，如果同时使用了<code>Access-Control-Allow-Credentials:true</code>将导致CORS的安全机制几乎完全失效，这就会导致安全问题。考虑到这种权限过于宽松，CORS又规定，`Access-Control-Allow-Origin:</em><code>与</code>Access-Control-Allow-Credentials:true`不能同时使用。浏览器会对下面这种误配置报错：</p>
+<figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">Access-Control-Allow-Origin</span>: *  </span><br><span class="line"><span class="attribute">Access-Control-Allow-Credentials</span>: true</span><br></pre></td></tr></table></figure>
+
+<p>CORS标准规定，<code>Access-Control-Allow-Origin</code>只能配置为单个origin，null或*，<br>如果开发者想要实现同时与多个域名共享域名的需求，则需要专门编写代码或者使用框架来协助动态生成访问控制策略。这种动态生成的做法增加了开发者配置难度，导致实际网络中出现各种不安全的误配置。</p>
+<p>最简单地动态生成访问控制策略的方法，就是在<code>Access-Control-Allow-Origin</code>中反射请求的Origin值。例如，下面是一个错误 Nginx 配置示例：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">add_header <span class="string">"Access-Control-Allow-Origin"</span> $http_origin;</span><br><span class="line">add_header “Access-Control-Allow-Credentials” “<span class="keyword">true</span>”;</span><br></pre></td></tr></table></figure>
+
+<p>这种配置相当于信任任何网站，任意攻击者都可以直接跨域读取网站资源。</p>
+<p>「Shell of the Future」工具就是利用CORS建立HTTP通道，将页面发送给控制端（攻击者），可以绕过一些反会话劫持的方法（Http-Only限制的Cookie、绑定IP地址的会话ID、……），实现XSS会话劫持。</p>
+<p>如果某个内部站点没有对外网开放，但CORS被设置为接受所有跨域请求，身在外部的攻击者同样可能通过构造钓鱼页面，诱导内部工作人员访问，通过内部工作人员的网络就可以成功访问到内部站点，从而获取到外网访问不到的敏感信息。</p>
+<p>防御：对于跨域请求，验证身份、验证数据有效性、……</p>
+<h4 id="Web-Storage"><a href="#Web-Storage" class="headerlink" title="Web Storage"></a>Web Storage</h4><p>「Web Storage」 实际上由两部分组成：</p>
+<ul>
+<li>sessionStorage<br>sessionStorage用于本地存储一个会话（session）中的数据，这些数据只有在同一个会话中的页面才能访问并且当会话结束后数据也随之销毁。因此sessionStorage不是一种持久化的本地存储，仅仅是会话级别的存储。</li>
+<li>localStorage<br>localStorage用于持久化的本地存储，除非主动删除数据，否则数据是永远不会过期的。</li>
+</ul>
+<p>由于是浏览器本地存储，而其API都是通过JavaScript提供的，那么意味着一旦重要、敏感的数据采用这种存储方式，攻击者就可以通过XSS攻击窃取信息。</p>
+<p>防御：避免存储敏感信息到WebStorage</p>
+<h4 id="WebSQL"><a href="#WebSQL" class="headerlink" title="WebSQL"></a>WebSQL</h4><p>HTML5 引入了一组使用 SQL 操作客户端数据库的 APIs。</p>
+<p>既然是数据库操作，那么就会存在一些比如注入等问题。</p>
+<p>防御：防护措施和SQL注入也是类似的，比如过滤关键词等。</p>
+<h4 id="API"><a href="#API" class="headerlink" title="API"></a>API</h4><p>HTML5 引入了一些新的API，可以实现新的攻击方法。</p>
+<p>由于 HTML5 涉及的API比较多，就不一一展开了。给一个「通过History新的API来隐藏恶意URL」的例子，可以搭配短网址来隐藏反射型XSS的攻击代码，以下为一个反射型XSS的URL：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://localhost/xss/?xsscode=<span class="tag">&lt;<span class="name">script</span>&gt;</span><span class="javascript">history.pushState(&#123;&#125;,<span class="string">''</span>,location.href.split(<span class="string">'?'</span>).shift());<span class="built_in">document</span>.write(<span class="number">1</span>)</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>用户访问页面后，XSS攻击代码被成功执行，但用户看到的URL却是<code>http://localhost/xss</code>，达到了隐藏恶意URL的效果。</p>
+<h3 id="点击劫持-Click-jacking"><a href="#点击劫持-Click-jacking" class="headerlink" title="点击劫持(Click jacking)"></a>点击劫持(Click jacking)</h3><p>点击劫持又称「UI覆盖攻击」，是一种视觉上的欺骗手段，它主要有两种方式，一是攻击者使用一个透明的iframe，覆盖在一个网页上，然后诱使用户在该页面上进行操作，此时用户将在不知情的情况下点击透明的iframe页面；二是攻击者使用一张图片覆盖在网页，遮挡网页原有位置的含义。</p>
+<p><img src="https://raw.githubusercontent.com/Hack1ng4fun/Hack1ng4fun.github.io/Pics/clickjacking.png" alt="点击劫持说明图"></p>
+<p>点击劫持的攻击原理比较简单，如果了解HTML、CSS的话应该不难理解。</p>
+<h4 id="点击劫持的防御"><a href="#点击劫持的防御" class="headerlink" title="点击劫持的防御"></a>点击劫持的防御</h4><ul>
+<li>使用<code>X-Frame-Options</code>响应头</li>
+</ul>
+<p>如果是通过JavaScript方法来禁止iFrame嵌套，存在被绕过的风险。</p>
+<h3 id="URL跳转（重定向）"><a href="#URL跳转（重定向）" class="headerlink" title="URL跳转（重定向）"></a>URL跳转（重定向）</h3><p>借助未验证的URL跳转，将应用程序引导到不安全的第三方区域，从而导致安全问题。</p>
+<h4 id="URL跳转漏洞实现过程"><a href="#URL跳转漏洞实现过程" class="headerlink" title="URL跳转漏洞实现过程"></a>URL跳转漏洞实现过程</h4><p>攻击者构造恶意链接 -&gt; 用户访问恶意链接 -&gt; 经过Web应用程序和浏览器的解析 -&gt; 跳转到恶意网站</p>
+<p>如果这个网站<code>http://localhost/?url=other.domain</code>的url参数可以用来跳转到其他网页，而网站并没有对 url 参数进行验证、限制的话，那就意味着攻击者也可以通过 url 参数来让用户跳转到任意网站（钓鱼页面、……）。如果是比较知名的公司旗下的网站存在URL跳转漏洞，用户看到恶意链接的域名是属于这个公司的，很可能就会信任这个链接。</p>
+<h4 id="URL跳转漏洞的防御"><a href="#URL跳转漏洞的防御" class="headerlink" title="URL跳转漏洞的防御"></a>URL跳转漏洞的防御</h4><ul>
+<li>严格控制将要跳转的域名</li>
+</ul>
+<h3 id="SQL注入（SQL-Injection）"><a href="#SQL注入（SQL-Injection）" class="headerlink" title="SQL注入（SQL Injection）"></a>SQL注入（SQL Injection）</h3><p>是一种常见的Web安全漏洞，攻击者利用这个漏洞可以访问或修改数据，或者利用潜在的数据库漏洞进行攻击。</p>
+<h4 id="SQL"><a href="#SQL" class="headerlink" title="SQL"></a>SQL</h4><p>全称是「结构化查询语言（STRUCTURED QUERY LANGUAGE）」，SQL 是用于访问和处理数据库的标准的计算机语言。</p>
+<h4 id="常见的SQL数据库"><a href="#常见的SQL数据库" class="headerlink" title="常见的SQL数据库"></a>常见的SQL数据库</h4><ul>
+<li>MySQL</li>
+<li>SQL Server</li>
+<li>……</li>
+</ul>
+<h4 id="SQL注入基本原理"><a href="#SQL注入基本原理" class="headerlink" title="SQL注入基本原理"></a>SQL注入基本原理</h4><p>以用户登录为例，程序在收到用户名和密码后，往往会先根据用户名和密码在数据库中查询用户名和密码（数据库中一般存储的是密码的Hash值，而不是密码的明文）同时匹配的数据库记录，如果在数据库中查询到对应的数据记录，则登录成功，否则登录失败。<br>它的SQL语句大概是这样的：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> * <span class="keyword">from</span> <span class="keyword">users</span> <span class="keyword">where</span> <span class="keyword">user</span>=<span class="string">'用户名'</span> <span class="keyword">and</span> <span class="keyword">password</span>=<span class="string">'密码的Hash值'</span></span><br></pre></td></tr></table></figure>
+
+<p>用户名的值是用户提交的，如果网站没有做相关的过滤的话，就可以提交一些「特殊的用户名」，来达到「修改SQL语句结构，而改变查询」的目的。因为密码字段在数据库中通常是以Hash值存储的，用户提交时程序会将密码转换为对应的Hash值，这样密码的字段就相当于不可控了，就没法通过密码的字段改变SQL语句结构，不过能控制用户名就足够了。在早些年，密码还是以明文存储的，经典的「万能密码」就是通过密码字段的注入点，实现登录任意用户帐号。</p>
+<p>如果将用户名字段写为<code>&#39; or 1=1;--+</code>，那么网站的SQL语句就会变成这样：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> * <span class="keyword">from</span> <span class="keyword">users</span> <span class="keyword">where</span> <span class="keyword">user</span>=<span class="string">''</span> <span class="keyword">or</span> <span class="number">1</span>=<span class="number">1</span>;<span class="comment">-- ' and password='密码的Hash值'</span></span><br></pre></td></tr></table></figure>
+
+<p>可以看到，提交的用户名改变了SQL语句原本的结构，进而改变了它的查询结果，以上语句把验证密码的部分注释掉了，并且使判断语句永远为真，导致的结果就是「会返回数据库中所有的用户数据」（因为判断语句永远为真(or 1=1)，所有数据都会符合判断条件，程序就返回了所有匹配的数据）。SQL注入的本质就是<strong>「数据和代码未分离，把用户输入当作代码执行」</strong>。</p>
+<p>SQL注入需要以下两个必备条件</p>
+<ul>
+<li>可以控制输入的数据</li>
+<li>服务器要执行的代码拼接了控制的数据</li>
+</ul>
+<h4 id="SQL注入点的两种类型"><a href="#SQL注入点的两种类型" class="headerlink" title="SQL注入点的两种类型"></a>SQL注入点的两种类型</h4><ul>
+<li>整数型<br>字段类型为 int ，不需要用引号闭合SQL语句。</li>
+<li>字符型<br>字段类型为 varchar ，字符型注入点则需要进一步判断SQL语句是使用单引号闭合的还是双引号，然后把语句正确闭合。</li>
+</ul>
+<h4 id="SQL注入的挖掘"><a href="#SQL注入的挖掘" class="headerlink" title="SQL注入的挖掘"></a>SQL注入的挖掘</h4><p>只要跟网站数据库有交互的地方都有可能存在SQL注入。（GET参数值、POST参数值、Cookie、……）</p>
+<h5 id="判断是否存在SQL注入"><a href="#判断是否存在SQL注入" class="headerlink" title="判断是否存在SQL注入"></a>判断是否存在SQL注入</h5><p>最常见的是使用<code>and 1=1</code>、<code>and 1=2</code>、<code>&#39;（引号）</code>这几种判断方式。</p>
+<p>假设要判断<code>http://localhost/?id=1</code>的 id 参数是否存在注入，先提交一个引号看看：<code>http://localhost/?id=1%27</code>（%27 是URL编码的单引号，因为无论是字符型还是整数型注入点，输入不成对的单/双引号，都会因为缺少另一半引号而导致SQL语句报错，如果网站报错了，说明 id 参数的值被带入SQL语句中执行了，意味着这里存在SQL注入。</p>
+<h5 id="判断注入点类型"><a href="#判断注入点类型" class="headerlink" title="判断注入点类型"></a>判断注入点类型</h5><p>之所以要判断注入点类型，是因为要知道SQL语句需不需要闭合、用双引号还是单引号闭合，知道这些才能构造正确的SQL语句。如果语句比较复杂，通常会使用注释符（<code>#</code>、<code>--</code>、<code>/**/</code>）来闭合语句末尾。</p>
+<p>找到注入点后，通过提交SQL语句并观察网站变化，来判断注入点是整数型还是字符型（还要判断SQL语句用的是单引号还是双引号）：</p>
+<ul>
+<li><code>http://localhost/?id=1 and 1=1</code> &amp;&amp; <code>http://localhost/?id=1 and 1=2</code></li>
+</ul>
+<p><strong>判断是否为整数型注入</strong></p>
+<p>正常情况下的SQL语句：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> * <span class="keyword">from</span> x <span class="keyword">where</span> <span class="keyword">id</span>=<span class="number">1</span></span><br></pre></td></tr></table></figure>
+
+<p>当提交 1=1（第一条测试语句）时的SQL语句：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> * <span class="keyword">from</span> x <span class="keyword">where</span> <span class="keyword">id</span>=<span class="number">1</span> <span class="keyword">and</span> <span class="number">1</span>=<span class="number">1</span></span><br></pre></td></tr></table></figure>
+
+<p>逻辑判断为真，所以返回正常。</p>
+<p>当提交 1=2（第二条测试语句）时的SQL语句：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> * <span class="keyword">from</span> x <span class="keyword">where</span> <span class="keyword">id</span>=<span class="number">1</span> <span class="keyword">and</span> <span class="number">1</span>=<span class="number">2</span></span><br></pre></td></tr></table></figure>
+
+<p>逻辑判断为假，所以返回错误。</p>
+<p>从外部来看，两次提交返回的结果不一致：1=1 时页面正常，1=2 时返回错误，表明这是整数型注入点。</p>
+<p>当注入点是字符型时，用来判断整数型注入的语句因为没有闭合引号，被引号包裹了，无法改变SQL语句结构，所以不管是 1=1（<code>select * from x where id=&#39;1 and 1=1&#39;</code>）还是 1=2（<code>select * from x where id=&#39;1 and 1=2&#39;</code>）页面都没有变化。</p>
+<p>当页面随着提交的SQL语句不同（1=1、1=2）而改变（页面正常/返回错误）时，就表明当前的测试语句符合注入点的类型（被当作语句执行，改变了逻辑判断的结果），重点就在于页面有没有随着提交的SQL语句的逻辑条件不同而产生变化。这就是使用<code>and 1=1</code>、<code>and 1=2</code>、<code>&#39;（引号）</code>来判断注入点类型的原理。</p>
+<ul>
+<li><code>http://localhost/?id=1&#39; and &#39;1&#39;=&#39;1</code> &amp;&amp; <code>http://localhost/?id=1&#39; and &#39;1&#39;=&#39;2</code></li>
+</ul>
+<p><strong>判断是否是字符型注入（单引号）</strong></p>
+<p>判断注入点类型的原理已经在上面说过了，就不重复说了，只写出各个情况下的SQL语句的变化，可以结合上面说的原理自己思考下。</p>
+<p>正常情况下的SQL语句：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> * <span class="keyword">from</span> x <span class="keyword">where</span> <span class="keyword">id</span>=<span class="string">'1'</span></span><br></pre></td></tr></table></figure>
+
+<p>当提交 1=1（第一条测试语句） 时的SQL语句：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> * <span class="keyword">from</span> x <span class="keyword">where</span> <span class="keyword">id</span>=<span class="string">'1'</span> <span class="keyword">and</span> <span class="string">'1'</span>=<span class="string">'1'</span></span><br></pre></td></tr></table></figure>
+
+<p>当提交 1=2（第二条测试语句） 时的SQL语句：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> * <span class="keyword">from</span> x <span class="keyword">where</span> <span class="keyword">id</span>=<span class="string">'1'</span> <span class="keyword">and</span> <span class="string">'1'</span>=<span class="string">'2'</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>http://localhost/?id=1&quot; and &quot;1&quot;=&quot;1</code> &amp;&amp; <code>http://localhost/?id=1&quot; and &quot;1&quot;=&quot;2</code></li>
+</ul>
+<p><strong>双引号的判断方法和上面两位（整数型、单引号）一样，这里不再列举……</strong></p>
+<h5 id="确定查询字段数"><a href="#确定查询字段数" class="headerlink" title="确定查询字段数"></a>确定查询字段数</h5><p><code>order by</code>语句可以用来判断查询的字段数，方便后续构造SQL语句（如：使用 union 时后面的语句的字段数需要和前面语句的查询字段数相同）。<code>http://localhost/?id=1 order by 5 --+</code>中 5 就是我们输入的字段数，如果真实字段数小于我们猜解的字段数就会抛出异常，我们就知道字段数是小于 5 的，然后继续在 1-5 的范围内猜解，逐步缩小范围，直到确定字段数。</p>
+<p><img src="https://raw.githubusercontent.com/Hack1ng4fun/Hack1ng4fun.github.io/Pics/orderby.png" alt="猜解字段数"></p>
+<p>通常会采用「二分查找」的方法来加快猜解的效率：<br><img src="https://raw.githubusercontent.com/Hack1ng4fun/Hack1ng4fun.github.io/Pics/dichotomy.png" alt="每次选择范围的中间值进行猜解"></p>
+<h5 id="确定回显点"><a href="#确定回显点" class="headerlink" title="确定回显点"></a>确定回显点</h5><p>「回显点」就是各个查询字段显示的位置，SQL语句的返回结果将显示在对应的位置。使用<code>union select</code>语句根据查询字段数指定对应数量的数据（有多少个查询字段，就select 多少个数据，这些数据最好不要相同，更容易分辨）。</p>
+<p>如果有三个查询字段，语句就是这样：<code>http://localhost/?id=1 union select 1,2,3</code>，1、2、3是随便写的，它们会分别显示在对应的回显点，通过看这三个数字在页面的位置，就知道各个查询字段的回显点的位置了。</p>
+<p>union 语句实际上是把两条语句返回的结果合并成一条返回，有些网站程序可能只会读取其中第一条结果，那样后面那条SQL语句返回的结果就没法显示了，这时候就需要让union前面那条语句的返回结果为空，只需要让前面那条语句的条件不成立即可：<code>http://localhost/?id=-1 union select 1,2,3</code>，假设<code>id=-1</code>的数据是不存在的，那返回结果就会为空，而后面那条语句是有结果的，所以最后返回的会是后面那条语句的结果。</p>
+<h4 id="SQL注入的利用"><a href="#SQL注入的利用" class="headerlink" title="SQL注入的利用"></a>SQL注入的利用</h4><h5 id="获取数据库信息"><a href="#获取数据库信息" class="headerlink" title="获取数据库信息"></a>获取数据库信息</h5><p>常用的MySQL函数：</p>
+<table>
+<thead>
+<tr>
+<th align="center">函数</th>
+<th align="center">作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">database()</td>
+<td align="center">当前所使用的数据库</td>
+</tr>
+<tr>
+<td align="center">version()</td>
+<td align="center">数据库版本</td>
+</tr>
+<tr>
+<td align="center">user()</td>
+<td align="center">当前用户</td>
+</tr>
+<tr>
+<td align="center">@@datadir</td>
+<td align="center">数据库的存储位置</td>
+</tr>
+<tr>
+<td align="center">@@version_compile_os</td>
+<td align="center">操作系统</td>
+</tr>
+<tr>
+<td align="center">concat()、concat_ws()</td>
+<td align="center">字符串拼接</td>
+</tr>
+<tr>
+<td align="center">ascii()</td>
+<td align="center">返回字符所对应的ASCII码</td>
+</tr>
+<tr>
+<td align="center">substring()、substr()</td>
+<td align="center">字符串截断</td>
+</tr>
+</tbody></table>
+<p>获取信息的常用语句</p>
+<ul>
+<li><p>获取所有数据库名</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> SCHEMA_NAME <span class="keyword">from</span> information_schema.SCHEMATA</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>获取指定数据库中的所有表名</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> TABLE_NAME <span class="keyword">from</span> information_schema.TABLES <span class="keyword">where</span> TABLE_SCHEMA=<span class="keyword">database</span>()</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>获取指定表中所有的字段名</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> COLUMN_NAME <span class="keyword">from</span> information_schema.COLUMNS <span class="keyword">where</span> TABLE_NAME=<span class="string">'USERS'</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>获取指定表中，指定字段的所有数据</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="keyword">user</span>,<span class="keyword">password</span> <span class="keyword">from</span> <span class="keyword">USERS</span></span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+<h5 id="读取系统文件"><a href="#读取系统文件" class="headerlink" title="读取系统文件"></a>读取系统文件</h5>  <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="keyword">load_file</span>(<span class="string">'c:\\windows\\win.ini'</span>)</span><br></pre></td></tr></table></figure>
+
+<p>注：Windows路径需要用双反斜杠转义</p>
+<h5 id="写入WebShell"><a href="#写入WebShell" class="headerlink" title="写入WebShell"></a>写入WebShell</h5><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="string">"&lt;?php @eval($_GET['cmd']); ?&gt;"</span> <span class="keyword">into</span> <span class="keyword">outfile</span> <span class="string">'D:\\web\\WWW\\shell.php'</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="SQL盲注"><a href="#SQL盲注" class="headerlink" title="SQL盲注"></a>SQL盲注</h4><p>之前讲的SQL注入实际上都是「SQL回显注入」——数据或执行结果会直接返回到页面上。<br>「SQL盲注」是无法通过SQL注入在页面返回内容中找到所需要的数据或用作注入成功判断的内容，都可以称为SQL盲注。</p>
+<h5 id="SQL盲注的几种方式"><a href="#SQL盲注的几种方式" class="headerlink" title="SQL盲注的几种方式"></a>SQL盲注的几种方式</h5><ul>
+<li>布尔型<br>通过条件判断的方式，观察页面变化来确认执行结果。</li>
+<li>时间型<br>在语句中增加延时函数或者执行比较耗时的命令，通过观察页面加载时间来确认执行结果。</li>
+<li>错误型<br>通过主动引发异常来让数据库将我们想要的信息暴露出来。</li>
+</ul>
+<h5 id="猜解数据库"><a href="#猜解数据库" class="headerlink" title="猜解数据库"></a>猜解数据库</h5><p>由于SQL盲注是看不到页面返回结果的，需要通过一步步猜解，才能得到想要的信息。</p>
+<ol>
+<li><p>确定当前数据库名长度<br>这里通过「布尔型」的方法来判断数据库名的长度，语句：<code>id=1 and length(database())&gt;5</code>（省略了前面的域名部分，重点关注 id 参数的值），这里判断数据库名长度是否大于 5，如果条件成立，页面就会正常返回，否则页面就不会正常返回——表明数据库名长度是小于等于 5 的，然后通过「二分查找」的方法接续在 5 的范围内猜解，直到确定数据库名的长度。（「二分查找」实际上更多就是用在进行SQL盲注时的猜解部分）</p>
+</li>
+<li><p>猜当前数据库名</p>
+</li>
+</ol>
+<p>分别猜解数据库名每一位的字符是什么，最终拼凑出完整的数据库名。<br>因为字符无法使用二分查找，猜解效率会非常低（尤其是手工注入的时候），那么可以通过将字符转换为「ASCII码」来解决：<code>select * from users where user_id=1 and ascii(substr(database(),1,1))&gt;100</code>，这里判断当前数据库名的第一个字符的ASCII码是否大于100，不是的话则继续猜解50、25、12……依此类推，最终成功确定数据库名第一个字符的ASCII码，接着只需要查看ASCII码对应的字符是什么即可，然后接着猜下一位字符……最终拼凑出完整的数据库名。之后的「猜表名」、「猜字段名」等，方法都是一样的。</p>
+<p>通过这种方法，可以逐步猜解出想要的信息，初学者应该尽量避免使用工具而使用手工操作，这样可以更好地理解SQL注入并熟练操作。当对SQL注入比较熟悉之后，就可以使用相关工具来解放双手，提高测试效率，开始学习使用「SQL注入神器」<strong>sqlmap</strong>。</p>
+<h4 id="SQL注入的防御"><a href="#SQL注入的防御" class="headerlink" title="SQL注入的防御"></a>SQL注入的防御</h4><ul>
+<li>参数化查询</li>
+<li>强制数据类型</li>
+<li>对用户输入，使用黑/白名单进行验证，把用户输入都当作不可信的</li>
+<li>有一些语言自带安全验证的方法，可以直接调用</li>
+<li>使用外部的安全框架和API</li>
+<li>使用WAF产品（它对Web漏洞是通用的，并不只针对于SQL注入）</li>
+</ul>
+<h3 id="文件上传"><a href="#文件上传" class="headerlink" title="文件上传"></a>文件上传</h3><p>现在很多网站都有上传功能（上传用户头像、发送文件、……），如果网站没有对用户上传的文件进行严格的验证、过滤的话，就容易产生「文件上传漏洞」，攻击者就可能通过上传恶意文件来将木马植入到网站服务器，从而获取网站权限。</p>
+<h4 id="一句话木马"><a href="#一句话木马" class="headerlink" title="一句话木马"></a>一句话木马</h4><p>一段脚本代码所造成的脚本木马，可以执行攻击者下发的指令，从而控制网站。</p>
+<p>一些语言的一句话木马示例：</p>
+<ul>
+<li>PHP</li>
+</ul>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span> @<span class="keyword">eval</span>($_POST(<span class="string">"cmd"</span>));<span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>ASP</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;%eval request(&quot;cmd&quot;)%&gt;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>ASP.NET</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;%@ PageLanguage&#x3D;&quot;Jscript&quot;%&gt;&lt;%eval(Request.item[&quot;cmd&quot;], &quot;unsafe&quot;);%&gt;</span><br></pre></td></tr></table></figure>
+
+<h4 id="任意文件上传"><a href="#任意文件上传" class="headerlink" title="任意文件上传"></a>任意文件上传</h4><p>文件上传功能的实现代码没有严格限制用户上传的文件后缀以及文件类型，导致攻击者可以上传任意文件（当然也包括脚本木马）。</p>
+<h4 id="绕过不同类型的限制，进行文件上传"><a href="#绕过不同类型的限制，进行文件上传" class="headerlink" title="绕过不同类型的限制，进行文件上传"></a>绕过不同类型的限制，进行文件上传</h4><p>大部分程序对于上传的文件都会进行一些限制和过滤的处理，如果程序验证不严谨，就可能被绕过。</p>
+<h5 id="一些绕过程序限制来上传文件的手段"><a href="#一些绕过程序限制来上传文件的手段" class="headerlink" title="一些绕过程序限制来上传文件的手段"></a>一些绕过程序限制来上传文件的手段</h5><ul>
+<li>MiME类型修改<br>MIME(Multipurpose Internet Mail Extensions)多用途互联网邮件扩展类型。是设定某种扩展名的文件用一种应用程序来打开的方式类型，当该扩展名文件被访问的时候，浏览器会自动使用指定应用程序来打开。</li>
+<li>文件内容绕过<br>比较常见的是通过将一句话木马插入到图片数据中（图片马），从而绕过Web应用的「文件内容检测」，然后在上传时通过抓包将文件后缀名改为脚本文件的后缀名或者利用「Web容器解析漏洞」来使脚本内容能够成功执行。</li>
+<li>JavaScript 前端绕过<br>有些网站是通过前端的 JavaScript 来验证上传文件的，而 JavaScript 是运行在客户端的，用户是可控的，自然也能被轻易绕过，只需要修改或删除相关的 JavaScript 代码即可（也可以抓包修改文件后缀名）。</li>
+</ul>
+<h3 id="命令、代码执行"><a href="#命令、代码执行" class="headerlink" title="命令、代码执行"></a>命令、代码执行</h3><h4 id="命令执行"><a href="#命令执行" class="headerlink" title="命令执行"></a>命令执行</h4><p>当应用需要调用一些外部程序去处理内容的情况下，就会用到一些执行系统命令的函数（如 PHP 中的「system」、「exec」、「shell_exec」、……）。</p>
+<p>当用户可以控制命令执行函数中的参数时，就可以注入恶意系统命令到正常的命令中，造成「命令执行漏洞」。</p>
+<h4 id="代码执行"><a href="#代码执行" class="headerlink" title="代码执行"></a>代码执行</h4><p>当应用在调用一些字符串转化为代码的函数（「eval」、「assert」、「preg_replace」、……）时，没有考虑到用户是否能控制这个字符串内容，将导致「代码注入漏洞」。</p>
+<h4 id="命令、代码执行的防御"><a href="#命令、代码执行的防御" class="headerlink" title="命令、代码执行的防御"></a>命令、代码执行的防御</h4><ul>
+<li><p>尽量少用可以执行命令的的函数（通过在<code>php.ini</code>中的「disable_functions」选项，可以设置要禁用的函数。）</p>
+</li>
+<li><p>使用「escapshellcmd」函数对参数进行过滤</p>
+</li>
+<li><p>在调用命令执行函数之前，对参数进行过滤、对敏感字符进行转义、……</p>
+</li>
+<li><p>避免使用 eval() 来读取 JSON</p>
+</li>
+<li><p>对于必须使用 eval() 的地方，要严格处理用户提交的数据</p>
+</li>
+</ul>
+<h3 id="逻辑漏洞"><a href="#逻辑漏洞" class="headerlink" title="逻辑漏洞"></a>逻辑漏洞</h3><p>所有应用程序都是通过逻辑实现各种丰富多彩的功能的，要实现这些功能必须掌握大量的技巧并进行周密的安排i，但在很多情况下，这些功能的逻辑存在缺陷。逻辑缺陷的本质就是<strong>设计者或开发者在思考问题的过程中做出的特殊假设存在明显或隐晦的错误</strong>。</p>
+<p>传统的Web漏洞在找到漏洞点之后，可能需要绕过各种防护手段（安全的开发框架、安全防护软件、入侵检测系统、……）。而「逻辑漏洞」主要是功能逻辑存在缺陷，代码逻辑是人的逻辑思维，找到关键点后，往往不用构造恶意的请求即可完成攻击，很容易绕开防护手段。</p>
+<h4 id="逻辑漏洞常见的表现形式"><a href="#逻辑漏洞常见的表现形式" class="headerlink" title="逻辑漏洞常见的表现形式"></a>逻辑漏洞常见的表现形式</h4><ul>
+<li><p>越权<br>一般包括「水平越权」和「垂直越权」。</p>
+<ul>
+<li><p>水平越权<br>相同级别（权限）的用户（角色）之间，可以越权访问、修改或删除的非法操作。</p>
+<p>如果出现漏洞，将可能会造成大批量数据泄漏，严重的甚至会造成用户信息被恶意篡改。<br>测试方法：一般是在发送请求的数据包中，将请求的资源的唯一标识符（订单ID、用户ID、文章ID、……）修改成一个不属于你的数据，查看返回结果。</p>
+</li>
+<li><p>垂直越权<br>不同级别（或不同角色）之间的越权。</p>
+<ul>
+<li>向上越权<br>低级别（权限）用户可以进行只有高级别用户（管理员）才能做的操作。</li>
+<li>向下越权<br>高级别用户可以访问低级别用户的信息。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>无限制地重试<br>比如在登录的时候，修改数据包中的密码字段重新发送，如果后端没有做次数限制，就会造成「密码爆破漏洞」；如果发送验证码的操作没有做时间限制，那么就会造成「短信轰炸漏洞」。</p>
+</li>
+<li><p>后端信任前端数据</p>
+</li>
+</ul>
+<p>前端是运行在客户端环境下的，意味着数据可能会被伪造，如果后端没有验证前端回传的数据，直接信任了从前端发送来的数据，就可能会被篡改的数据包欺骗。（例如在购买商品时，修改商品的金额，后端没有做验证的话，攻击者就可以任意篡改商品金额，可以想象这个后果有多严重。）</p>
+<ul>
+<li>竞态条件考虑不周<br>竞态条件(race condition)是指设备或系统出现不恰当的执行时序，而得到不正确的结果。<br>一个操作应该只产生一次结果，但是利用多线程重复发送数据包请求，可能产生多条结果。</li>
+<li>……</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>勇敢的心
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://hack1ng4fun.github.io/2019/10/12/%E3%80%8CWeb%E5%AE%89%E5%85%A8%E3%80%8D%E7%AF%87/" title="「Web安全」篇">https://hack1ng4fun.github.io/2019/10/12/「Web安全」篇/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Web%E5%AE%89%E5%85%A8/" rel="tag"># Web安全</a>
+              <a href="/tags/Web%E5%AE%89%E5%85%A8%E5%9F%BA%E7%A1%80/" rel="tag"># Web安全基础</a>
+              <a href="/tags/Web%E5%AE%89%E5%85%A8%E5%85%A5%E9%97%A8/" rel="tag"># Web安全入门</a>
+              <a href="/tags/Web%E6%BC%8F%E6%B4%9E/" rel="tag"># Web漏洞</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2019/09/13/%E5%8F%98%E6%80%81%E5%BF%83%E7%90%86%E5%AD%A6%E4%B8%AD%E7%9A%84%E5%90%84%E7%A7%8D%E3%80%8C%E5%BF%83%E7%90%86%E9%9A%9C%E7%A2%8D%E3%80%8D/" rel="prev" title="变态心理学中的各种「心理障碍」">
+      <i class="fa fa-chevron-left"></i> 变态心理学中的各种「心理障碍」
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2019/10/13/%E3%80%8C%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95%E3%80%8D%E7%AF%87/" rel="next" title="「渗透测试」篇">
+      「渗透测试」篇 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+    
+  
+  <div class="comments">
+  <script src="https://utteranc.es/client.js" repo="Hack1ng4fun/Hack1ng4fun.github.io" issue-term="pathname" theme="github-light" crossorigin="anonymous" async></script>
+  </div>
+  
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#「Web安全」篇"><span class="nav-number">1.</span> <span class="nav-text">「Web安全」篇</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#浏览器"><span class="nav-number">1.1.</span> <span class="nav-text">浏览器</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#浏览器机制"><span class="nav-number">1.1.1.</span> <span class="nav-text">浏览器机制</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#同源策略"><span class="nav-number">1.1.1.1.</span> <span class="nav-text">同源策略</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#浏览器渲染机制"><span class="nav-number">1.1.1.2.</span> <span class="nav-text">浏览器渲染机制</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#浏览器安全策略"><span class="nav-number">1.1.2.</span> <span class="nav-text">浏览器安全策略</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#CSP内容安全策略（Content-Security-Policy）"><span class="nav-number">1.1.2.1.</span> <span class="nav-text">CSP内容安全策略（Content Security Policy）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Cookie安全"><span class="nav-number">1.1.2.2.</span> <span class="nav-text">Cookie安全</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#iframe沙盒"><span class="nav-number">1.1.2.3.</span> <span class="nav-text">iframe沙盒</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#flash安全沙箱"><span class="nav-number">1.1.2.4.</span> <span class="nav-text">flash安全沙箱</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#OWASP"><span class="nav-number">1.2.</span> <span class="nav-text">OWASP</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#OWASP-TOP-10"><span class="nav-number">1.2.1.</span> <span class="nav-text">OWASP TOP 10</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#OWASP-TOP-10-2017版"><span class="nav-number">1.2.1.1.</span> <span class="nav-text">OWASP TOP 10 2017版</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#常见Web漏洞"><span class="nav-number">1.3.</span> <span class="nav-text">常见Web漏洞</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#跨站脚本攻击-XSS"><span class="nav-number">1.3.1.</span> <span class="nav-text">跨站脚本攻击(XSS)</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#主流XSS类型"><span class="nav-number">1.3.1.1.</span> <span class="nav-text">主流XSS类型</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#其他XSS类型"><span class="nav-number">1.3.1.2.</span> <span class="nav-text">其他XSS类型</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#XSS攻击和防御"><span class="nav-number">1.3.1.3.</span> <span class="nav-text">XSS攻击和防御</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#跨站请求伪造-CSRF"><span class="nav-number">1.3.2.</span> <span class="nav-text">跨站请求伪造(CSRF)</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#CSRF漏洞的利用"><span class="nav-number">1.3.2.1.</span> <span class="nav-text">CSRF漏洞的利用</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#CSRF的防御手段"><span class="nav-number">1.3.2.2.</span> <span class="nav-text">CSRF的防御手段</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#目录穿越（目录遍历）与文件包含"><span class="nav-number">1.3.3.</span> <span class="nav-text">目录穿越（目录遍历）与文件包含</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#目录穿越"><span class="nav-number">1.3.3.1.</span> <span class="nav-text">目录穿越</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#文件包含"><span class="nav-number">1.3.3.2.</span> <span class="nav-text">文件包含</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#远程文件包含"><span class="nav-number">1.3.3.2.1.</span> <span class="nav-text">远程文件包含</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#文件包含和目录穿越的防御"><span class="nav-number">1.3.3.3.</span> <span class="nav-text">文件包含和目录穿越的防御</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#JSONP（JSON-with-Padding）安全与防御"><span class="nav-number">1.3.4.</span> <span class="nav-text">JSONP（JSON with Padding）安全与防御</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#什么是-JSONP"><span class="nav-number">1.3.4.1.</span> <span class="nav-text">什么是 JSONP</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#JSON劫持（JSON-Hijacking）"><span class="nav-number">1.3.4.2.</span> <span class="nav-text">JSON劫持（JSON Hijacking）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#JSONP-的安全问题"><span class="nav-number">1.3.4.3.</span> <span class="nav-text">JSONP 的安全问题</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#JSON劫持的防御"><span class="nav-number">1.3.4.4.</span> <span class="nav-text">JSON劫持的防御</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#XSS问题的防御"><span class="nav-number">1.3.4.5.</span> <span class="nav-text">XSS问题的防御</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#HTML5-安全问题与防御"><span class="nav-number">1.3.5.</span> <span class="nav-text">HTML5 安全问题与防御</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#XSS"><span class="nav-number">1.3.5.1.</span> <span class="nav-text">XSS</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#CORS（跨域资源共享）"><span class="nav-number">1.3.5.2.</span> <span class="nav-text">CORS（跨域资源共享）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Web-Storage"><span class="nav-number">1.3.5.3.</span> <span class="nav-text">Web Storage</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#WebSQL"><span class="nav-number">1.3.5.4.</span> <span class="nav-text">WebSQL</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#API"><span class="nav-number">1.3.5.5.</span> <span class="nav-text">API</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#点击劫持-Click-jacking"><span class="nav-number">1.3.6.</span> <span class="nav-text">点击劫持(Click jacking)</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#点击劫持的防御"><span class="nav-number">1.3.6.1.</span> <span class="nav-text">点击劫持的防御</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#URL跳转（重定向）"><span class="nav-number">1.3.7.</span> <span class="nav-text">URL跳转（重定向）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#URL跳转漏洞实现过程"><span class="nav-number">1.3.7.1.</span> <span class="nav-text">URL跳转漏洞实现过程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#URL跳转漏洞的防御"><span class="nav-number">1.3.7.2.</span> <span class="nav-text">URL跳转漏洞的防御</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SQL注入（SQL-Injection）"><span class="nav-number">1.3.8.</span> <span class="nav-text">SQL注入（SQL Injection）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#SQL"><span class="nav-number">1.3.8.1.</span> <span class="nav-text">SQL</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#常见的SQL数据库"><span class="nav-number">1.3.8.2.</span> <span class="nav-text">常见的SQL数据库</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#SQL注入基本原理"><span class="nav-number">1.3.8.3.</span> <span class="nav-text">SQL注入基本原理</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#SQL注入点的两种类型"><span class="nav-number">1.3.8.4.</span> <span class="nav-text">SQL注入点的两种类型</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#SQL注入的挖掘"><span class="nav-number">1.3.8.5.</span> <span class="nav-text">SQL注入的挖掘</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#判断是否存在SQL注入"><span class="nav-number">1.3.8.5.1.</span> <span class="nav-text">判断是否存在SQL注入</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#判断注入点类型"><span class="nav-number">1.3.8.5.2.</span> <span class="nav-text">判断注入点类型</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#确定查询字段数"><span class="nav-number">1.3.8.5.3.</span> <span class="nav-text">确定查询字段数</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#确定回显点"><span class="nav-number">1.3.8.5.4.</span> <span class="nav-text">确定回显点</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#SQL注入的利用"><span class="nav-number">1.3.8.6.</span> <span class="nav-text">SQL注入的利用</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#获取数据库信息"><span class="nav-number">1.3.8.6.1.</span> <span class="nav-text">获取数据库信息</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#读取系统文件"><span class="nav-number">1.3.8.6.2.</span> <span class="nav-text">读取系统文件</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#写入WebShell"><span class="nav-number">1.3.8.6.3.</span> <span class="nav-text">写入WebShell</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#SQL盲注"><span class="nav-number">1.3.8.7.</span> <span class="nav-text">SQL盲注</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#SQL盲注的几种方式"><span class="nav-number">1.3.8.7.1.</span> <span class="nav-text">SQL盲注的几种方式</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#猜解数据库"><span class="nav-number">1.3.8.7.2.</span> <span class="nav-text">猜解数据库</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#SQL注入的防御"><span class="nav-number">1.3.8.8.</span> <span class="nav-text">SQL注入的防御</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#文件上传"><span class="nav-number">1.3.9.</span> <span class="nav-text">文件上传</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#一句话木马"><span class="nav-number">1.3.9.1.</span> <span class="nav-text">一句话木马</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#任意文件上传"><span class="nav-number">1.3.9.2.</span> <span class="nav-text">任意文件上传</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#绕过不同类型的限制，进行文件上传"><span class="nav-number">1.3.9.3.</span> <span class="nav-text">绕过不同类型的限制，进行文件上传</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#一些绕过程序限制来上传文件的手段"><span class="nav-number">1.3.9.3.1.</span> <span class="nav-text">一些绕过程序限制来上传文件的手段</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#命令、代码执行"><span class="nav-number">1.3.10.</span> <span class="nav-text">命令、代码执行</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#命令执行"><span class="nav-number">1.3.10.1.</span> <span class="nav-text">命令执行</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#代码执行"><span class="nav-number">1.3.10.2.</span> <span class="nav-text">代码执行</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#命令、代码执行的防御"><span class="nav-number">1.3.10.3.</span> <span class="nav-text">命令、代码执行的防御</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#逻辑漏洞"><span class="nav-number">1.3.11.</span> <span class="nav-text">逻辑漏洞</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#逻辑漏洞常见的表现形式"><span class="nav-number">1.3.11.1.</span> <span class="nav-text">逻辑漏洞常见的表现形式</span></a></li></ol></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="勇敢的心"
+      src="https://raw.githubusercontent.com/Hack1ng4fun/Hack1ng4fun.github.io/Pics/mhyVJS.png">
+  <p class="site-author-name" itemprop="name">勇敢的心</p>
+  <div class="site-description" itemprop="description">Just for Fun</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">16</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">34</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="/rss2.xml" title="RSS → &#x2F;rss2.xml"><i class="fa fa-fw fa-rss"></i>RSS</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">勇敢的心</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    <span title="站点总字数">61k</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

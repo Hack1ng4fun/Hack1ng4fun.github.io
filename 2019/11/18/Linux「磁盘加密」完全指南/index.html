@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon32.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon16.png">
+  <link rel="mask-icon" href="/images/favicon32.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-flash.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"hack1ng4fun.github.io","root":"/","scheme":"Gemini","version":"7.7.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="Linux「磁盘加密」完全指南本文只涉及 Linux 下的加密操作，如果你是在 Windows 平台下的话，直接用系统自带的「BitLocker」就可以了，图形界面操作也相对简单。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Linux「磁盘加密」完全指南">
+<meta property="og:url" content="https://hack1ng4fun.github.io/2019/11/18/Linux%E3%80%8C%E7%A3%81%E7%9B%98%E5%8A%A0%E5%AF%86%E3%80%8D%E5%AE%8C%E5%85%A8%E6%8C%87%E5%8D%97/index.html">
+<meta property="og:site_name" content="勇敢的心">
+<meta property="og:description" content="Linux「磁盘加密」完全指南本文只涉及 Linux 下的加密操作，如果你是在 Windows 平台下的话，直接用系统自带的「BitLocker」就可以了，图形界面操作也相对简单。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2019-11-17T16:34:51.000Z">
+<meta property="article:modified_time" content="2020-03-24T14:00:18.000Z">
+<meta property="article:author" content="勇敢的心">
+<meta property="article:tag" content="磁盘加密">
+<meta property="article:tag" content="隐私保护">
+<meta property="article:tag" content="数据安全">
+<meta property="article:tag" content="物理安全">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://hack1ng4fun.github.io/2019/11/18/Linux%E3%80%8C%E7%A3%81%E7%9B%98%E5%8A%A0%E5%AF%86%E3%80%8D%E5%AE%8C%E5%85%A8%E6%8C%87%E5%8D%97/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Linux「磁盘加密」完全指南 | 勇敢的心</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="勇敢的心" type="application/atom+xml">
+<link rel="alternate" href="/rss2.xml" title="勇敢的心" type="application/rss+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">勇敢的心</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://hack1ng4fun.github.io/2019/11/18/Linux%E3%80%8C%E7%A3%81%E7%9B%98%E5%8A%A0%E5%AF%86%E3%80%8D%E5%AE%8C%E5%85%A8%E6%8C%87%E5%8D%97/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://raw.githubusercontent.com/Hack1ng4fun/Hack1ng4fun.github.io/Pics/mhyVJS.png">
+      <meta itemprop="name" content="勇敢的心">
+      <meta itemprop="description" content="Just for Fun">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="勇敢的心">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Linux「磁盘加密」完全指南
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-11-18 00:34:51" itemprop="dateCreated datePublished" datetime="2019-11-18T00:34:51+08:00">2019-11-18</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Linux/" itemprop="url" rel="index"><span itemprop="name">Linux</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>7.8k</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="Linux「磁盘加密」完全指南"><a href="#Linux「磁盘加密」完全指南" class="headerlink" title="Linux「磁盘加密」完全指南"></a>Linux「磁盘加密」完全指南</h1><p>本文只涉及 Linux 下的加密操作，如果你是在 Windows 平台下的话，直接用系统自带的「BitLocker」就可以了，图形界面操作也相对简单。</p>
+<a id="more"></a>
+
+<p>本文中使用的 Linux 发行版是 Arch Linux，在不同发行版下的相关操作可能有所不同，以你使用的发行版官方Wiki为准。</p>
+<h2 id="磁盘加密的意义"><a href="#磁盘加密的意义" class="headerlink" title="磁盘加密的意义"></a>磁盘加密的意义</h2><p>磁盘加密是为了保护计算机系统的物理安全（当我们不在家时如何保证电脑内数据的安全、防止系统被偷偷植入木马后门、……）。如果磁盘上存储了重要的商业机密或者是像我们这种重视隐私的人，为了防止信息泄漏以及来自线下的降维攻击），除了需要做好计算机网络、系统的安全以外，还需要考虑到物理环境下的主机安全。「安全」本身是符合「水桶理论」的，任何一个安全缺陷都会对整体的安全性造成威胁。</p>
+<h2 id="dm-crypt"><a href="#dm-crypt" class="headerlink" title="dm_crypt"></a>dm_crypt</h2><blockquote>
+<p>dm-crypt 是使用内核加密API框架和设备映射器（device mapper）子系统的磁盘加密系统。使用dm-crypt，管理员可以加密整个磁盘，逻辑卷，分区以及单个文件。</p>
+</blockquote>
+<p>在 Linux 下通过 cryptsetup 工具来操作 dm-crypt，如何安装就不说了，某些发行版（比如 Arch）已经自带了 cryptsetup 工具，如果你使用的系统没有自带，请参考发行版的官方Wiki或网上教程进行安装。</p>
+<h2 id="虚拟分区"><a href="#虚拟分区" class="headerlink" title="虚拟分区"></a>虚拟分区</h2><p>通过创建一个大文件来作为加密容器使用，它的好处是灵活（它本质上就是一个文件），可以很容易地复制到其他计算机上继续使用（当然需要密码）。</p>
+<p>首先使用 fallocate 命令生成一个名为 enc 的 10GB 大小的文件容器：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">fallocate -l 10G enc</span><br></pre></td></tr></table></figure>
+
+<p>使用 cryptsetup 对文件容器进行加密：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cryptsetup -c aes-xts-plain64 -s 512 -h sha512 -i 5000 luksFormat enc</span><br></pre></td></tr></table></figure>
+
+<p>它首先会提示设备内的数据将被覆盖，是否确定，确认无误后输入 YES（大写），然后输入两次密码。<br>注：enc 是前面创建的那个文件路径，这里因为 enc 就在当前目录，所以没有写路径。</p>
+<table>
+<thead>
+<tr>
+<th align="center">参数</th>
+<th align="center">解释</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">-c –cipher</td>
+<td align="center">加密算法</td>
+</tr>
+<tr>
+<td align="center">-s –key-size</td>
+<td align="center">密钥大小</td>
+</tr>
+<tr>
+<td align="center">-h –hash</td>
+<td align="center">哈希算法</td>
+</tr>
+<tr>
+<td align="center">-i –iter-time</td>
+<td align="center">用来对抗暴力破解，值越大暴力破解越困难（在解密时也越耗时）</td>
+</tr>
+</tbody></table>
+<p>完成后使用以下命令解密容器，并指定映射名为 myenc（这个参数不可省略）：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cryptsetup open enc myenc</span><br></pre></td></tr></table></figure>
+
+<p>密码正确的话，你将在 /dev/mapper/ 目录下看到映射设备（myenc）。</p>
+<p>解密后就可以把容器当作普通分区来操作了，先创建文件系统：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mkfs.ext4 enc</span><br></pre></td></tr></table></figure>
+
+<p>挂载文件系统：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mount /dev/mapper/myenc /mnt</span><br></pre></td></tr></table></figure>
+
+<p>使用完后记得及时关闭，密钥将会马上从内存中被清除：</p>
+<p>先卸载文件系统：<code>umount /mnt</code>，然后关闭加密盘<code>cryptsetup close myenc</code></p>
+<h2 id="物理分区"><a href="#物理分区" class="headerlink" title="物理分区"></a>物理分区</h2><p>加密分区的基本操作和使用，在上面的「虚拟分区」 步骤中应该已经有所了解了，对物理分区的加密也是一样的（示例：<code>cryptsetup [参数1 参数2 ……] luksFormat /dev/sda1</code>），这里不再重复讲解。</p>
+<h2 id="加密现有的未加密的分区"><a href="#加密现有的未加密的分区" class="headerlink" title="加密现有的未加密的分区"></a>加密现有的未加密的分区</h2><p><strong>如果你要加密根分区或 /boot 分区，还需要额外的配置工作，请参考「全盘加密」章节</strong><br><strong>如果设备中有重要数据，务必先做好备份再进行下列操作。</strong></p>
+<p>如果要对现有的未加密分区进行加密的话，就要使用到 cryptsetup-reencrypt 命令。</p>
+<p>假设要加密的设备是 /dev/sdx1。</p>
+<p>首先卸载分区：<code>umount /dev/sdx1</code></p>
+<p>因为 LUKS（Linux 硬盘加密标准）的加密头需要在分区的头部位置有 512 字节的大小，我们需要收缩文件系统的大小来给它腾出空间。（你分区的剩余空间应该够吧？……）<br>先检查文件系统：<code>e2fsck -f /dev/sdx1</code><br>收缩文件系统：<code>resize2fs -M /dev/sdx1</code>（可能需要几分钟，取决于分区大小。）</p>
+<p>加密分区：<code>cryptsetup-reencrypt [参数1 参数2 ……] luksFormat --new --reduce-device-size 4096S /dev/sdx1</code>（因为要重新加密整个设备，如果你的分区比较大的话，我建议你在睡前进行加密操作，起床时应该就好了……）</p>
+<p>加密完成后，解密分区：<code>cryptsetup open /dev/sdx1 www</code></p>
+<p>再次检查文件系统（加密以后就不要操作原来的分区了，要操作解密后映射出来的设备，这里是 /dev/mapper/www）：<code>e2fsck -f /dev/mapper/www</code><br>恢复文件系统大小：<code>resize2fs /dev/mapper/www</code></p>
+<p>完成~</p>
+<h2 id="修改加密容器的加密参数"><a href="#修改加密容器的加密参数" class="headerlink" title="修改加密容器的加密参数"></a>修改加密容器的加密参数</h2><p><strong>如果设备中有重要数据，务必先做好备份再进行下列操作。</strong></p>
+<p>如果在加密后想要修改加密容器的某些加密参数但不想对整个设备进行重新加密时，就会需要对现有的加密容器重新进行加密，同样是使用 cryptsetup-reencrypt 命令。</p>
+<p>假设要重新加密的加密容器为 /dev/sdc3（这里要操作的是真实的分区，而不是映射的设备）。</p>
+<p>首先确保加密容器已关闭，然后使用新参数对加密容器进行重新加密：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cryptsetup-reencrypt [参数1 参数2 ……] /dev/sdc3</span><br></pre></td></tr></table></figure>
+
+<p>输入密码，等待完成即可。</p>
+<h2 id="cryptsetup-常用操作"><a href="#cryptsetup-常用操作" class="headerlink" title="cryptsetup 常用操作"></a>cryptsetup 常用操作</h2><p>到这里，你应该已经能够理解基本的加/解密操作了，在后面的操作中，一些基本的操作不会做很详细的解释。在这里我把 cryptsetup 的常用操作统一做个讲解，在后面更复杂的操作中，可以专注于主要的部分，而不是在加密命令上纠缠。</p>
+<h3 id="密钥槽"><a href="#密钥槽" class="headerlink" title="密钥槽"></a>密钥槽</h3><p>密钥槽（Key slot）是用来表示解密密钥的“孔位”，LUKS 默认有 8 个密钥槽，也就是可以同时设置 8 个用来解密的密钥，在加密时我们已经用掉了第一个，使用 <code>cryptsetup luksDump /dev/sdx?</code>命令可以看到第一个（从 0 开始）密钥孔位已经被使用。</p>
+<h3 id="添加新密钥"><a href="#添加新密钥" class="headerlink" title="添加新密钥"></a>添加新密钥</h3><p>新的解密密钥默认会使用下一个未使用的密钥孔位，也可以 通过 <code>-S (--key-slot)</code> 来指定要使用哪一个密钥孔位（0-7）。<br>使用 cryptsetup 的<code>luksAddKey</code> 选项添加一个新的密码或密钥文件（key-file），这里添加一个新的密码：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cryptsetup luksAddKey /dev/sdx1</span><br></pre></td></tr></table></figure>
+
+<p>提示说输入任何一个已存在的密钥槽的密码，输入密码，然后输入两次新密码即可。完成后使用 <code>cryptsetup luksDump /dev/sdx1</code> 命令可以看到现在已经有两个密钥槽被使用了，这两个密钥槽的密码都能用来解密加密容器。</p>
+<h3 id="删除一个密钥槽"><a href="#删除一个密钥槽" class="headerlink" title="删除一个密钥槽"></a>删除一个密钥槽</h3><p>使用 cryptsetup 命令的 luksKillSlot 选项来删除孔位为 1 的密钥槽：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cryptsetup luksKillSlot /dev/sdx1 1</span><br></pre></td></tr></table></figure>
+
+<p>输入其他剩下的任意一个密钥槽的密码即可。</p>
+<h3 id="key-file"><a href="#key-file" class="headerlink" title="key-file"></a>key-file</h3><p>除了密码，还可以使用 key-file 作为密钥来解密加密容器，它通常是一个随机数二进制文件。密码通常只有 10-20 位，因为有记忆成本，但是 key-file 没有这个限制。只使用 key-file 作为解密密钥，可以完全杜绝暴力破解，只要你的密钥文件不被窃取，那么它就是相对安全的。</p>
+<p>通过 dd 命令生成一个 32KB 大小的名字为 key 的随机数文件作为 key-file：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dd <span class="keyword">if</span>=/dev/urandom of=key bs=1k count=32</span><br></pre></td></tr></table></figure>
+
+<p>命令完成后，在当前目录下可以看到一个名为 key 的文件，把它加入到密钥槽：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cryptsetup luksAddKey /dev/sdx? key(密钥文件路径)</span><br></pre></td></tr></table></figure>
+
+<p>输入其他任意一个已有的密钥槽的密码。<br>如果你只想使用 key-file 来解密容器，添加成功后删除原来的密钥槽即可。</p>
+<p>如果在加密时想使用 key-file 作为密钥，方法也是一样的：<code>cryptsetup luksFormat /dev/sdd? key(密钥文件)</code></p>
+<p>在解密时使用<code>-d (--key-file)</code>参数指定密钥文件：<code>cryptsetup open /dev/sdx? myenc -d key(密钥文件)</code></p>
+<h3 id="在启动时解密设备"><a href="#在启动时解密设备" class="headerlink" title="在启动时解密设备"></a>在启动时解密设备</h3><p>/etc/crypttab 文件类似于 fstab 文件，用来在启动时解密被加密的设备。<br>crypttab 文件于 fstab 文件之前被加载，这样可以在设备被解密后通过 fstab 文件正常挂载设备。</p>
+<p>示例文件：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">#&lt;name&gt;       &lt;device&gt;                                      &lt;password&gt;              &lt;options&gt;</span><br><span class="line"></span><br><span class="line"> home         UUID&#x3D;b8ad5c18-f445-495d-9095-c9ec4f9d2f37    &#x2F;etc&#x2F;mypassword1</span><br><span class="line"> data1        &#x2F;dev&#x2F;sda3                                    &#x2F;etc&#x2F;mypassword2</span><br><span class="line"> data2        &#x2F;dev&#x2F;sda5                                    &#x2F;etc&#x2F;cryptfs.key</span><br><span class="line"> swap         &#x2F;dev&#x2F;sdx4                                    &#x2F;dev&#x2F;urandom            swap,cipher&#x3D;aes-c</span><br></pre></td></tr></table></figure>
+
+<p>配置文件总共有四个字段，分别是映射设备名、加密设备、用来解密的密钥文件（key-file）、选项，第一和第二个字段是必需的。</p>
+<p>省略第三个字段或把第三个字段设置为<code>none</code>、<code>-</code>则表示在解密时手动输入密码。</p>
+<p>如果要在系统启动时通过手动输入密码来解密 /dev/sdx1，配置文件可以写为如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">myenc &#x2F;dev&#x2F;sdx1 none</span><br></pre></td></tr></table></figure>
+
+<p>系统在启动过程中会要求输入密码来解密设备。</p>
+<p>如果要在解密后自动挂载设备，只需要像正常设备一样配置 fstab 文件即可：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;dev&#x2F;mapper&#x2F;myenc(映射设备名) &#x2F;home ext4 rw,relatime 0 2</span><br></pre></td></tr></table></figure>
+
+<h3 id="相关文档"><a href="#相关文档" class="headerlink" title="相关文档"></a>相关文档</h3><ul>
+<li>关于 crypttab 文件的详细信息可以看<a href="http://www.jinbuguo.com/systemd/crypttab.html" target="_blank" rel="noopener">这里</a></li>
+<li>关于 cryptsetup 命令的详细信息可以看<a href="https://linux.die.net/man/8/cryptsetup" target="_blank" rel="noopener">这里</a></li>
+<li>关于 cryptsetup-reencrypt 命令的详细信息可以看<a href="http://man7.org/linux/man-pages/man8/cryptsetup-reencrypt.8.html" target="_blank" rel="noopener">这里</a></li>
+</ul>
+<h2 id="全盘加密"><a href="#全盘加密" class="headerlink" title="全盘加密"></a>全盘加密</h2><p>这部分主要讲解如何在 Linux 下实现<strong>包含 /boot 分区的全盘加密</strong>。</p>
+<h3 id="加密-boot-的必要性"><a href="#加密-boot-的必要性" class="headerlink" title="加密 /boot 的必要性"></a>加密 /boot 的必要性</h3><p>/boot 分区中包含第二阶段引导所需要的内核文件，加密 /boot 分区可以缓解大部分在启动过程中发生的攻击。（但仍然可能受到 BIOS/UEFI 固件篡改、冷启动攻击、硬件键盘记录器等攻击手段的威胁，这超出了本文范围，在此不作解释。）</p>
+<p>Grub 是支持 /boot 分区加密的，我们会使用它来作为我们的引导加载程序。（不过 Grub 有一个小限制，下面会谈到。）</p>
+<h3 id="加密方案"><a href="#加密方案" class="headerlink" title="加密方案"></a>加密方案</h3><p>要对系统进行「全盘的」加密，首先需要选择一种加密方案，以下有几种常见的加密方案，后续会针对这几种加密方案进行加密操作：<br><strong>如果你使用 UEFI 引导：不管在什么情况下，EFI 分区都是不能被加密的。</strong></p>
+<ol>
+<li>LVM 物理卷在加密容器下（先加密了整个分区，然后在加密分区中创建了 LVM物理卷。）</li>
+<li>加密容器在 LVM 下（对 LVM 划分出来的逻辑卷进行加密。PS:逻辑卷可能有多个，如果想加密所有逻辑卷，那么需要分别对各个逻辑卷进行加密。）</li>
+<li>没有使用 LVM 的普通分区</li>
+<li>额外需要注意的问题：/boot 是否要进行单独分区？</li>
+</ol>
+<p>来说说以上这几种分区布局应该如何进行加密，以及它们之间的一些区别：</p>
+<p>第一种和第二种方案是使用 LVM 的情况，区别在于 LVM 和 加密容器的层级关系不同，如果 LVM 物理卷是创建在加密容器之下的，那么 LVM 的分区布局对外是不可见的，因为它被外层的加密容器所保护；如果加密容器是在 LVM 之下的话，实际上就是加密了 LVM 下的逻辑卷，这种情况下，LVM的分区布局对外是透明的，它本身（LVM）并没有被加密，被加密的是它底下的那些逻辑卷，第二种方案可以支持加密与非加密分区的混合使用，只加密需要加密的分区，具体操作和普通的分区加密没区别，这个章节说的是全盘加密，会假设所有逻辑卷都需要加密。<br>除了布局的可见性以外，第一和第二种方案还有一个区别，就是内核钩子的加载顺序，第一种情况需要先加载 dm-crypt 模块解密容器，然后 LVM 逻辑卷才会被映射出来，后续才能被正常挂载、使用；第二种情况则是需要 LVM 模块先加载，然后加载 dm-crypt 来解密逻辑卷。</p>
+<p>第三种情况是没有使用 LVM，这是最普通的情况，这种情况和第二种情况基本相同，只是它不再需要加载 LVM 模块。</p>
+<p>还有一个需要注意的点，就是 /boot 目录是否要进行单独分区？ /boot 目录包含了系统引导时所需要的内核文件，如果要加密 /boot 分区，需要「引导加载程序」支持，Grub 就支持加密的 /boot 分区，我们使用它作为引导加载程序，但是 Grub 只支持 LUKS1 加密（cryptsetup 默认会使用 LUKS2，LUKS1 和 LUKS2 的主要区别在于 LUKS2 拥有更多功能，别担心，LUKS1 也是一样安全的），所以会有两种情况：/boot 进行了单独分区，在加密 /boot 分区时要指定<code>-M luks1</code>参数；/boot 没有进行单独分区，它和根分区在同一分区，那么就要在加密根分区的时侯指定<code>-M luks1</code>参数。</p>
+<h3 id="全盘加密-操作"><a href="#全盘加密-操作" class="headerlink" title="全盘加密-操作"></a>全盘加密-操作</h3><p>已经详细讲过的操作在接下来不会讲得很细，需要的时候我依然会进行一些说明。</p>
+<ul>
+<li><p>LVM 在加密容器中<br>这里通过一个稍微复杂点的布局来说明各种操作。<br>假设总共创建了三个分区，分别是<code>/dev/sdx1</code>、<code>/dev/sdx2</code>和<code>/dev/sdx3</code>， <code>/dev/sdx1</code>作为 EFI 分区（如果你是BIOS引导则不需要此分区），<code>/dev/sdx2</code> 作为 /boot 分区，<code>/dev/sdx3</code>中打算用来创建 LVM 物理卷。<br>这里的 /boot 目录进行了单独分区，对它进行单独加密并指定使用 LUKS1：<code>cryptsetup luksFormat  -M luks1 /dev/sdx2</code><br>打开加密容器：<code>cryptsetup open /dev/sdx2 boot</code><br>为 /boot 分区创建文件系统：<code>mkfs.ext4 /dev/mapper/boot</code><br>加密 <code>dev/sdx3</code>：<code>cryptsetup luksFormat /dev/sdx3</code><br>打开加密容器：<code>cryptsetup open /dev/sdx3 root</code><br>创建文件系统用来存储物理卷：<code>mkfs.ext4 /dev/mapper/root</code><br>创建物理卷：<code>pvcreate /dev/mapper/root</code><br>创建名为 main 的卷组：<code>vgcreate main /dev/mapper/root</code><br>创建用来挂载在 /home 目录的逻辑卷：<code>lvcreate -L 500G(大小) -n home(名字) main</code><br>创建用来作根分区的逻辑卷：<code>lvcreate -L 500G -n root main</code><br>为逻辑卷分别创建文件系统（命令省略）。<br>把逻辑卷分别挂载好，就可以正常安装系统了，安装好系统再进行下一步。<br>前面说了，LVM 和 dm-crypt 的加载是有顺序的，这里需要先加载 dm-crypt 来解密容器，然后再加载 LVM。为了能够输入密码，还需要在 dm-crypt 之前先加载 keyboard 模块，LVM 和 dm-crypt 对应的模块名分别是<code>lvm2</code>和<code>encrypt</code>。 内核钩子的配置文件在 Arch Linux 的位置是 /etc/mkinitcpio.conf，<code>HOOKS</code>这一行就是内核钩子了，把<code>keyboard</code>、<code>encrypt</code>和<code>lvm2</code> 插入到合适的位置，正确的顺序大概是这样的（keyboard 模块只要在 dm-crypt 模块之前加载就没问题）：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">HOOKS&#x3D;(base udev autodetect keyboard modconf block encrypt lvm2 filesystems fsck)</span><br></pre></td></tr></table></figure>
+
+<p>修改了内核钩子后，要重新生成 initramfs：<code>mkinitcpio -p linux</code><br>安装引导（如果没安装 Grub，请先安装）：<code>grub-install --target=x86_64-efi --efi-directory=/efi</code><br>这里我以 UEFI 引导为例并假设 EFI 分区挂载在 /efi 目录，如果你使用 BIOS 引导的话参考这条命令：<code>grub-install --target=i386-pc /dev/sdx(根分区)</code><br>修改 Grub 内核启动参数（/dev/default/grub），修改<code>GRUB_CMDLINE_LINUX=</code>这一行配置，用来在引导时解密根分区，格式为如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">GRUB_CMDLINE_LINUX&#x3D;&quot;cryptdevice&#x3D;UUID&#x3D;加密容器的UUID，可以通过 blkid 命令查看:映射设备名 root&#x3D;根分区&quot;</span><br></pre></td></tr></table></figure>
+
+<p>我的配置如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">GRUB_CMDLINE_LINUX&#x3D;&quot;cryptdevice&#x3D;UUID&#x3D;42ad71f4-d8a3-4ce5-8c38-7eb608008e35:root root&#x3D;&#x2F;dev&#x2F;mapper&#x2F;main-root&quot;</span><br></pre></td></tr></table></figure>
+
+<p>开启 Grub 的加密选项，用来在引导时解密 /boot 分区，将<code>GRUB_ENABLE_CRYPTODISK=</code>选项设置为<code>GRUB_ENABLE_CRYPTODISK=y</code><br>生成 Grub 配置文件：<code>grub-mkconfig -o /boot/grub/grub.cfg</code></p>
+<p>现在已经完成了全盘加密，在引导过程中会要求你输入密码解密 /boot 分区，随后在启动系统时会再次要求你输入密码以解密根分区。如果你觉得麻烦，只想在开机时输入一个密码，可以通过把密钥嵌入到 initramfs 中实现，这里不作演示。</p>
+<p>知识补充：<br>在解密根分区的时候，实际上就是在解锁加密容器，因为根分区包含在加密容器中，加密容器解锁之后，在它下面的那些逻辑卷也就自然解锁了，除了 /boot 和 根分区的解密需要在引导过程中完成，其他像 /home /var 之类的普通分区可以通过设置 /etc/crypttab 文件和 /etc/fstab 文件来在系统启动后自动解密并挂载，把密钥文件放在加密的根分区中（一定不要放在未加密的分区中，那等于白送……），在解密容器的过程中系统会自动读取密钥文件，而不用手动输入密码，同时因为密钥文件本身是存放在加密的根分区中，在根分区解密之前，它会得到保护。</p>
+</li>
+<li><p>加密容器在 LVM 中<br>这个方案的操作和上面的大同小异，只是加密容器和 LVM 的层级不同，内核钩子的顺序和上面的不一样（LVM 先加载，然后加载 encrypt）；这种情况下逻辑卷都是单独加密的，要给除了根分区和 /boot 分区以外的逻辑卷都添加一个密钥文件用来启动时自动解密（如果要手动输入的话，逻辑卷比较多时岂不是要输到怀疑人生？），这样在启动时就只需要手动输入根分区和 /boot 分区的密码，系统成功启动后就会自动解密、挂载其他剩下的逻辑卷。</p>
+</li>
+<li><p>没有使用 LVM</p>
+<p>这种情况和「加密容器在 LVM 中」的操作是基本相同的，只是不需要加载 lvm2 的内核钩子了（<del>因为没有用到嘛</del>），其他的配置和「加密容器在 LVM 中」没有区别。</p>
+</li>
+<li><p>/boot 和根分区在同一分区</p>
+<p>这种情况下，在加密根分区时一定要记得使用 LUKS1 加密，如果因为某些原因根分区一定要用 LUKS2，那就把 /boot 目录拉出来单独分区，单独使用 LUKS1 加密。<br>在这种情况下你会发现一个问题：为什么 /boot 目录和根分区在同一分区，但是在启动时却需要输入两次密码？这是因为 Grub 在解锁分区后不会传递给 initramfs，第一次是为 Grub 输入密码，第二次是为 initramfs。解决办法是把密钥文件嵌入到initramfs 中。</p>
+</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>勇敢的心
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://hack1ng4fun.github.io/2019/11/18/Linux%E3%80%8C%E7%A3%81%E7%9B%98%E5%8A%A0%E5%AF%86%E3%80%8D%E5%AE%8C%E5%85%A8%E6%8C%87%E5%8D%97/" title="Linux「磁盘加密」完全指南">https://hack1ng4fun.github.io/2019/11/18/Linux「磁盘加密」完全指南/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E7%A3%81%E7%9B%98%E5%8A%A0%E5%AF%86/" rel="tag"># 磁盘加密</a>
+              <a href="/tags/%E9%9A%90%E7%A7%81%E4%BF%9D%E6%8A%A4/" rel="tag"># 隐私保护</a>
+              <a href="/tags/%E6%95%B0%E6%8D%AE%E5%AE%89%E5%85%A8/" rel="tag"># 数据安全</a>
+              <a href="/tags/%E7%89%A9%E7%90%86%E5%AE%89%E5%85%A8/" rel="tag"># 物理安全</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2019/10/16/%E3%80%8C%E4%BA%91%E5%AE%89%E5%85%A8%E3%80%8D%E7%AF%87/" rel="prev" title="「云安全」篇">
+      <i class="fa fa-chevron-left"></i> 「云安全」篇
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/02/10/%E7%94%A8%E3%80%8C%E7%BB%8F%E6%B5%8E%E5%AD%A6%E6%80%9D%E7%BB%B4%E3%80%8D%E5%81%9A%E7%90%86%E6%80%A7%E5%86%B3%E7%AD%96/" rel="next" title="用「经济学思维」做理性决策">
+      用「经济学思维」做理性决策 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+    
+  
+  <div class="comments">
+  <script src="https://utteranc.es/client.js" repo="Hack1ng4fun/Hack1ng4fun.github.io" issue-term="pathname" theme="github-light" crossorigin="anonymous" async></script>
+  </div>
+  
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Linux「磁盘加密」完全指南"><span class="nav-number">1.</span> <span class="nav-text">Linux「磁盘加密」完全指南</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#磁盘加密的意义"><span class="nav-number">1.1.</span> <span class="nav-text">磁盘加密的意义</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#dm-crypt"><span class="nav-number">1.2.</span> <span class="nav-text">dm_crypt</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#虚拟分区"><span class="nav-number">1.3.</span> <span class="nav-text">虚拟分区</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#物理分区"><span class="nav-number">1.4.</span> <span class="nav-text">物理分区</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#加密现有的未加密的分区"><span class="nav-number">1.5.</span> <span class="nav-text">加密现有的未加密的分区</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#修改加密容器的加密参数"><span class="nav-number">1.6.</span> <span class="nav-text">修改加密容器的加密参数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#cryptsetup-常用操作"><span class="nav-number">1.7.</span> <span class="nav-text">cryptsetup 常用操作</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#密钥槽"><span class="nav-number">1.7.1.</span> <span class="nav-text">密钥槽</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#添加新密钥"><span class="nav-number">1.7.2.</span> <span class="nav-text">添加新密钥</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#删除一个密钥槽"><span class="nav-number">1.7.3.</span> <span class="nav-text">删除一个密钥槽</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#key-file"><span class="nav-number">1.7.4.</span> <span class="nav-text">key-file</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#在启动时解密设备"><span class="nav-number">1.7.5.</span> <span class="nav-text">在启动时解密设备</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#相关文档"><span class="nav-number">1.7.6.</span> <span class="nav-text">相关文档</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#全盘加密"><span class="nav-number">1.8.</span> <span class="nav-text">全盘加密</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#加密-boot-的必要性"><span class="nav-number">1.8.1.</span> <span class="nav-text">加密 &#x2F;boot 的必要性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#加密方案"><span class="nav-number">1.8.2.</span> <span class="nav-text">加密方案</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#全盘加密-操作"><span class="nav-number">1.8.3.</span> <span class="nav-text">全盘加密-操作</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="勇敢的心"
+      src="https://raw.githubusercontent.com/Hack1ng4fun/Hack1ng4fun.github.io/Pics/mhyVJS.png">
+  <p class="site-author-name" itemprop="name">勇敢的心</p>
+  <div class="site-description" itemprop="description">Just for Fun</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">16</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">34</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="/rss2.xml" title="RSS → &#x2F;rss2.xml"><i class="fa fa-fw fa-rss"></i>RSS</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">勇敢的心</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    <span title="站点总字数">61k</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
