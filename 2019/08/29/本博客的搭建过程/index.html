@@ -31,7 +31,7 @@
 <meta property="og:description" content="本博客的搭建过程本博客使用的是Hexo框架，它的官网是这么介绍的:“A fast, simple &amp; powerful blog framework, powered by Node.js”(基于“Nodejs”的一个快速、简单、强大的博客框架)。">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2019-08-29T14:44:44.000Z">
-<meta property="article:modified_time" content="2019-08-29T14:44:44.000Z">
+<meta property="article:modified_time" content="2020-03-26T13:52:01.000Z">
 <meta property="article:author" content="勇敢的心">
 <meta property="article:tag" content="网站搭建">
 <meta property="article:tag" content="Git服务器">
@@ -221,6 +221,13 @@
 
               <time title="创建时间：2019-08-29 22:44:44" itemprop="dateCreated datePublished" datetime="2019-08-29T22:44:44+08:00">2019-08-29</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-03-26 21:52:01" itemprop="dateModified" datetime="2020-03-26T21:52:01+08:00">2020-03-26</time>
+              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
@@ -273,13 +280,13 @@
 <p>没有特殊需求的话推荐使用“GitHub Pages”，它是免费的，也不需要维护服务器。<br>这里我只讲在个人服务器上的部署，个人服务器和“GitHub pages”的部署大致上是相同的，只是如果用个人服务器的话需要上服务器手动安装(配置)Web服务组件以及搭建Git服务器，也就是比“GitHub Pages”的部署步骤多了服务器上的操作。</p>
 <h2 id="开搞"><a href="#开搞" class="headerlink" title="开搞"></a>开搞</h2><h3 id="客户端操作"><a href="#客户端操作" class="headerlink" title="客户端操作"></a>客户端操作</h3><p>我使用一个安装了“Arch Linux”系统的虚拟机来演示客户端上的操作，所以以下操作都是在此Linux发行版下完成，如果你使用的是Windows或者其他系统，可以在网上找到对应的安装教程，这里只演示Linux下的操作。</p>
 <p>因为“Hexo”是基于“Nodejs”的，所以需要先安装“Nodejs”环境:</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pacman -S nodejs</span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs Shell">pacman -S nodejs<br></code></pre></td></tr></table></figure>
 
 <p>“npm”是“Nodejs”的“包管理工具”，我们需要用它来安装“Hexo”，所以先安装它:</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Pacamn -S npm</span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs Shell">Pacamn -S npm<br></code></pre></td></tr></table></figure>
 
 <p>“Nodejs”和“npm”都安装好后就可以开始安装“Hexo”了:</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install hexo-cli -g</span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs Shell">npm install hexo-cli -g<br></code></pre></td></tr></table></figure>
 
 <p>接下来可以使用“Hexo”来初始化一个博客了，创建一个目录用于存放站点文件，然后进入到该目录下输入命令:<code>hexo init</code>回车即可。<br>先用<code>hexo g</code>命令生成静态文件；<br>使用<code>hexo s</code>命令会在本地建立一个临时的Web服务，使我们可以在本地访问博客。<br><strong>注意:“Hexo”的命令要在存放博客的目录下执行，也就是前面创建的那个目录</strong></p>
 <p>“Hexo”默认的本地Web服务端口是<strong>4000</strong>，应当在访问地址后面指明端口，就像这样:<code>localhost:4000</code>。</p>
@@ -287,41 +294,41 @@
 <h3 id="服务端操作"><a href="#服务端操作" class="headerlink" title="服务端操作"></a>服务端操作</h3><p>服务器使用的发Linux行版是“Ubuntu 18.04”，理论上来说，搭建的流程都是一样的，只是安装软件包的命令和软件包名称在不同的系统上可能有差别。如果有差别的话，只需要在网上查询一下自己系统使用的命令和对应的包名就行。</p>
 <p>首先第一步自然是使用“SSH”连接到服务器上，我们使用“Nginx”来提供Web服务，为什么使用“Nginx”而不使用“Apache”？<br>因为我们的博客是一个静态站点，“静态处理”是“Nginx”的强项，可以在高性能的同时保持较低的资源(内存)占用。</p>
 <p>安装“Nginx”:</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">apt install nginx</span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs Shell">apt install nginx<br></code></pre></td></tr></table></figure>
 
 <p>安装完成后，如果有需要可以对“Nginx”进行配置，“Nginx”主配置文件在<code>/etc/nginx/nginx.conf</code>(在不同的Linux发行版下可能不同),这里不对“Nginx”进行配置,使用默认配置即可。<br>启动并设置“Nginx”服务为开机启动:</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl enable --now nginx</span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs Shell">systemctl enable --now nginx<br></code></pre></td></tr></table></figure>
 
 <p>验证一下“Nginx”能否正常工作:浏览器中访问服务器地址(“Nginx”默认工作端口就是标准的80端口)，不出意外的话，应当能够看到“Nginx”的欢迎页面，表明“Nginx”正在工作。</p>
 <p>现在我们要在个人服务器上搭建“Git”服务。<br>Git服务是通过“SSH”创建连接的，所以先安装“SSH”的服务端(在有些Linux发行版下，SSH的客户端和服务端是一体(在一个包里)的:</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">apt install openssh-server</span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs Shell">apt install openssh-server<br></code></pre></td></tr></table></figure>
 
 <p>然后安装“Git”:</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">apt install git</span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs Shell">apt install git<br></code></pre></td></tr></table></figure>
 
 <p>创建一个目录用来作为“Git仓库”(一般“Git仓库”的名字后缀会写成“.git”)，我创建的目录名字是“blog.git”，并进入到该目录下执行命令<code>git init --bare</code>把目录初始化为一个“Git仓库”(Repository)，现在这个目录就是“Hexo”用来部署站点的“远程仓库”了。<br>在该目录下会发现多出了许多目录，其中有一个“hooks”目录，这个目录就是用来设置“Git Hook”的，进入该“hooks”目录下新建一个“post-receive”文件(如果这个文件已经存在的话，就直接编辑这个文件),写入以下内容:</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash">!/bin/bash</span></span><br><span class="line">git --work-tree=/var/www/html/ --git-dir=/home/john/blog.git checkout -f</span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs Shell"><span class="hljs-meta">#</span><span class="bash">!/bin/bash</span><br>git --work-tree=/var/www/html/ --git-dir=/home/john/blog.git checkout -f<br></code></pre></td></tr></table></figure>
 
 <p><strong>注:“–work-tree=”这个参数指定的是网站根目录，我使用的是“Nginx”默认设置，默认的网站根目录是:“/var/www/html”，“–git-dir=”参数指定的是Git仓库的路径(之前创建的那个目录)，我的仓库目录是“/home/john/blog.git”。</strong></p>
 <p>创建一个“git”用户专门用来操作“Git”仓库:</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">useradd git</span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs Shell">useradd git<br></code></pre></td></tr></table></figure>
 
 <p>使用<code>passwd git</code>命令来给git用户设置密码。<br>为了安全,限制“git”用户登录到Shell,让“git”用户只能进行Git操作:<br>编辑<code>/etc/passwd</code>文件,如果看不懂也没关系,只需要找到开头是“git”的那一行就行,大概长这样:</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git:x:1001:1001:::&#x2F;bin&#x2F;bash</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">git:x:1001:1001:::&#x2F;bin&#x2F;bash<br></code></pre></td></tr></table></figure>
 
 <p>把最后的登录“Shell”改为“git-shell”，像这样:</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git:x:1001:1001:::&#x2F;usr&#x2F;bin&#x2F;git-shell</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">git:x:1001:1001:::&#x2F;usr&#x2F;bin&#x2F;git-shell<br></code></pre></td></tr></table></figure>
 
 <p>最后修改仓库目录的权限:</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">chown -R git:git /home/john/blog.git</span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs Shell">chown -R git:git /home/john/blog.git<br></code></pre></td></tr></table></figure>
 
 <p>服务器到这里就配置完毕了~可以回到客户端了。</p>
 <h3 id="回到客户端做最后的操作"><a href="#回到客户端做最后的操作" class="headerlink" title="回到客户端做最后的操作"></a>回到客户端做最后的操作</h3><p>安装“Hexo”的部署插件:<code>npm install hexo-deployer-git</code>。<br>配置“Hexo”的部署插件:在博客目录中找到并打开“_config.yml”文件，查找关键词“<strong>deploy</strong>”，找到“deploy”这个字段的配置，大概长这样:</p>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">deploy:</span></span><br><span class="line">    <span class="attr">type:</span></span><br><span class="line">    <span class="attr">repo:</span></span><br><span class="line">    <span class="attr">branch:</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs YAML"><span class="hljs-attr">deploy:</span><br>    <span class="hljs-attr">type:</span><br>    <span class="hljs-attr">repo:</span><br>    <span class="hljs-attr">branch:</span><br></code></pre></td></tr></table></figure>
 
 <p><code>type</code>字段填“git”;<br><code>repo</code>字段填你远程服务器的“Git”仓库的地址;<br><code>branch</code>如果你没有自己设置“Git”仓库的分支的话就填“master”,如果你改了“Git”仓库的分支,你应该知道填什么。</p>
 <p>我的配置填完后是这样的:</p>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">deploy:</span></span><br><span class="line">    <span class="attr">type:</span> <span class="string">git</span></span><br><span class="line">    <span class="attr">repo:</span> <span class="string">git@x.x.x.x:/home/john/blog.git</span></span><br><span class="line">    <span class="attr">branch:</span> <span class="string">master</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs YAML"><span class="hljs-attr">deploy:</span><br>    <span class="hljs-attr">type:</span> <span class="hljs-string">git</span><br>    <span class="hljs-attr">repo:</span> <span class="hljs-string">git@x.x.x.x:/home/john/blog.git</span><br>    <span class="hljs-attr">branch:</span> <span class="hljs-string">master</span><br></code></pre></td></tr></table></figure>
 
 <p>清除一下Hexo缓存:<code>hexo clean</code>。<br>重新生成静态文件:<code>hexo g</code>。<br>P.s:每次安装了新插件或更改了“Hexo”配置后，都应该执行一下以上两条指令，以保证新插件和新配置及时生效以及正常工作。<br>一键部署:<code>hexo d</code>，连接到服务器后会要求输入’git’用户的密码，输入正确密码后即可自动部署到服务器上，我们在服务器上设置的“Git Hook”在接受到客户端的推送后会自动更新网站根目录,实现自动部署。<br>如果你没有手动停止“Nginx”服务的话，那现在应该可以看到成果了，用浏览器访问服务器ip(或域名),应该就能看到部署的网站了。<br>以后更新文章只需要在客户端写好以后，用<code>hexo g</code>重新生成静态文件，再通过<code>Hexo d</code>来一键更新到网站(可以在推送到网站前先用<code>hexo s</code>在本地预览一下，没问题后再推送到网站).</p>
 <h3 id="结尾"><a href="#结尾" class="headerlink" title="结尾"></a>结尾</h3><p>这篇文章的重心在于网站的部署，所以没有涉及到博客的配置/主题的安装等工作。博客搭建好了，其他的这些配置之类的问题都是很简单、方便的，“Hexo”的官方文档也很全面，网上也有很多相关的文章、教程，对各位来说这应该不是问题~<br><strong>Cheers~</strong></p>
@@ -447,7 +454,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">16</span>
+          <span class="site-state-item-count">17</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -501,7 +508,7 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-area-chart"></i>
     </span>
-    <span title="站点总字数">61k</span>
+    <span title="站点总字数">64k</span>
 </div>
 
         
